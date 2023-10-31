@@ -1,18 +1,35 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>D3 Project Starter Template</title>
+    <title>One Commit at a Time</title>
     <meta charset="UTF-8">
     <link rel="icon" href="data:;base64,iVBORwOKGO=" />
     <link rel="stylesheet" href="css/style.css">
 </head>
-<body>    
+<body>
     <!-- Add HTML content, SVG drawing area, ... -->
+    <h1>GitHub Repositories: One Commit at a Time</h1>
+    <div id="app">
+        <svg id="contributor"/>
+        <div class="beside">
+            <div class="above">
+                <svg id="timeline"/>
+                <svg id="time-selector"/>
+            </div>
+            <svg id="file-tree"/>
+        </div>
+
+    </div>
     
     <!-- D3 bundle -->
     <script src="js/d3.v6.min.js"></script>
 
     <!-- Our JS code -->
     <script src="js/main.js"></script>
+    <script src="js/views/timelineVis.js"></script>
+    <script src="js/views/timeSelectorVis.js"></script>
+    <script src="js/views/contributorVis.js"></script>
+    <script src="js/views/fileTreeVis.js"></script>
+    <script src="js/util/queryUtil.js"></script>
 </body>
 </html>
