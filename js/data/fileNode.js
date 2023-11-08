@@ -38,7 +38,7 @@ class FileNode {
 
         // if the file has been deleted, remove it as a child
         if (change.modificationType === "D" && !newChangeName) {
-            this.children.splice(this.children.indexOf(child), 1);
+            this.#removeChild(child);
             return child;
         }
 
