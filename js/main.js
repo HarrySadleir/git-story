@@ -7,13 +7,9 @@ const dispatcher = d3.dispatch('filterDates', 'filterContributors');
 /**
  * Load data from CSV file asynchronously and render charts
  */
-d3.csv('data/sanitized-data.csv')
+d3.dsv('%', 'data/processed_dataset.dsv')
 	.then(_data => {
-		data = _data;
-		data.forEach(d => {
-			// TODO: adjust header names and types, call more significant parsing as needed
-			return d;
-		});
+        data = new GitData(_data);
 
 		// TODO: common scales, other shared behaviour
 
