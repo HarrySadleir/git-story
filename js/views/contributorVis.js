@@ -6,9 +6,16 @@ class ContributorVis {
       containerWidth: _config.containerWidth || 1000,
       containerHeight: _config.containerHeight || 600,
       margin: _config.margin || { top: 20, right: 20, bottom: 20, left: 20 },
+	  tooltipPadding: 15,
     };
     this.dispatcher = _dispatcher;
     this.data = _data;
+
+    this.tooltip = d3
+      .select("body")
+      .append("div")
+      .attr("class", "tooltip")
+      .style("opacity", 0);
 
     this.selectedContributors = [];
     this.initVis();
@@ -70,7 +77,11 @@ class ContributorVis {
 
     // Define a scale function to scale down the circle sizes
     // const scale = d3.scaleLinear().domain([0, maxTotal]).range([5, 100]); // Adjust the range for circle sizes
-	const scale = d3.scalePow().exponent(0.5).domain([0, maxTotal]).range([5, 100]); 
+    const scale = d3
+      .scalePow()
+      .exponent(0.5)
+      .domain([0, maxTotal])
+      .range([5, 100]);
 
     const threshold = 0; // Adjust the threshold as needed
 
@@ -84,6 +95,24 @@ class ContributorVis {
       .data(filteredAuthors)
       .enter()
       .append("circle")
+      .on("mouseover", (event, d) => {
+        const value =
+          d.cost === null
+            ? "No data available"
+            : Math.round(d.cost * 100) / 100;
+        d3
+          .select("#tooltip")
+          .style("display", "block")
+          .style("left", event.pageX + vis.config.tooltipPadding + "px")
+          .style("top", event.pageY + vis.config.tooltipPadding + "px").html(`
+            <div class='tooltip-title'>${d.authorName}</div>
+			<div>Additions: <strong>${d.totalInsertions}</strong></div>
+			<div>Deletions: <strong>${d.totalDeletions}</strong></div>
+          `);
+      })
+      .on("mouseleave", () => {
+        d3.select("#tooltip").style("display", "none");
+      })
       .attr("r", (d) => scale(d.totalInsertions + d.totalDeletions))
       .style("fill", "#69b3a2")
       .style("fill-opacity", 0.3)
