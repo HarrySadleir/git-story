@@ -69,12 +69,19 @@ class ContributorVis {
     );
 
     // Define a scale function to scale down the circle sizes
-    const scale = d3.scaleLinear().domain([0, maxTotal]).range([10, 50]); // Adjust the range as needed to control the circle sizes
+    // const scale = d3.scaleLinear().domain([0, maxTotal]).range([5, 100]); // Adjust the range for circle sizes
+	const scale = d3.scalePow().exponent(0.5).domain([0, maxTotal]).range([5, 100]); 
+
+    const threshold = 0; // Adjust the threshold as needed
+
+    const filteredAuthors = authors.filter(
+      (d) => d.totalInsertions + d.totalDeletions >= threshold
+    );
 
     // Update the "r" attribute in the node creation
     let node = vis.chart
       .selectAll("circle")
-      .data(authors)
+      .data(filteredAuthors)
       .enter()
       .append("circle")
       .attr("r", (d) => scale(d.totalInsertions + d.totalDeletions))
@@ -85,7 +92,7 @@ class ContributorVis {
 
     // Increase the strength of the forceCollide
     let simulation = d3
-      .forceSimulation(authors)
+      .forceSimulation(filteredAuthors) // Use the filtered data for simulation
       .force(
         "center",
         d3
@@ -93,20 +100,26 @@ class ContributorVis {
           .x(vis.width / 2)
           .y(vis.height / 2)
       )
-      .force("charge", d3.forceManyBody().strength(1.0))
+      .force("charge", d3.forceManyBody().strength(1.5)) // Adjust strength
       .force(
         "collide",
         d3
           .forceCollide()
-          .strength(2)
+          .strength(1) // Adjust strength
           .radius((d) => scale(d.totalInsertions + d.totalDeletions))
           .iterations(1)
       );
 
-    // Set initial positions closer together in the center
-    authors.forEach((d) => {
-      d.x = vis.width / 2 + Math.random() * 50; // Adjust the factor as needed
-      d.y = vis.height / 2 + Math.random() * 50; // Adjust the factor as needed
+    // Calculate the maximum radius of all circles
+    const maxRadius = d3.max(authors, (d) =>
+      scale(d.totalInsertions + d.totalDeletions)
+    );
+
+    // Set initial positions from the center outward without overlapping
+    authors.forEach((d, i) => {
+      const angle = (i / authors.length) * 2 * Math.PI; // Calculate angle based on the number of circles
+      d.x = vis.width / 2 + maxRadius * Math.cos(angle);
+      d.y = vis.height / 2 + maxRadius * Math.sin(angle);
     });
 
     // Update the "cx" and "cy" attributes in the tick function
