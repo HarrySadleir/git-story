@@ -1,24 +1,25 @@
 <!DOCTYPE html>
 <html>
-  <head>
+<head>
     <title>One Commit at a Time</title>
-    <meta charset="UTF-8" />
+    <meta charset="UTF-8">
     <link rel="icon" href="data:;base64,iVBORwOKGO=" />
-    <link rel="stylesheet" href="css/style.css" />
-  </head>
-  <body>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
     <!-- Add HTML content, SVG drawing area, ... -->
     <h1>GitHub Repositories: One Commit at a Time</h1>
     <div id="app">
-      <svg id="contributor"></svg>
-      <div id="tooltip"></div>
-      <div class="beside">
-        <div class="above">
-          <svg id="timeline"></svg>
-          <svg id="time-selector"></svg>
+        <svg id="contributor"></svg>
+        <div id="tooltip"></div>
+        <div class="beside">
+            <div class="above">
+                <svg id="timeline"></svg>
+                <svg id="time-selector"></svg>
+            </div>
+            <svg id="file-tree"></svg>
         </div>
-        <svg id="file-tree"></svg>
-      </div>
+
     </div>
 
     <!-- D3 bundle -->
@@ -32,5 +33,5 @@
     <script src="js/views/fileTreeVis.js"></script>
     <script src="js/data/gitData.js"></script>
     <script src="js/data/fileNode.js"></script>
-  </body>
+</body>
 </html>
