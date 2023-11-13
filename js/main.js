@@ -1,5 +1,6 @@
 // Global objects
-let data, dateRange, selectedContributors, timelineVis, timeSelectorVis, contributorVis, fileTreeVis;
+let data, dateRange, timelineVis, timeSelectorVis, contributorVis, fileTreeVis;
+let selectedContributors = []
 
 // TODO: Add dispatcher events as needed
 const dispatcher = d3.dispatch('filterDates', 'filterContributors');
@@ -69,6 +70,10 @@ dispatcher.on('filterContributors', _selectedContributors => {
 	// Update timelineVis
 	timelineVis.data = filteredData;
 	timelineVis.updateVis();
+
+	// Update contributorVis
+	contributorVis.data = filteredData;
+	contributorVis.updateVis();
 
 	// Update timeSelectorVis. TODO: Not sure if this is needed, but it may be nice to update this too?
 	timeSelectorVis.data = filteredData;
