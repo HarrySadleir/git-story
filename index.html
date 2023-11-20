@@ -9,22 +9,25 @@
 </head>
 
 <body>
-  <!-- Add HTML content, SVG drawing area, ... -->
-  <h1>GitHub Repositories: One Commit at a Time</h1>
-  <div id="app">
-    <svg id="contributor" />
-    <div class="beside">
-      <div class="above">
-        <svg id="timeline" />
-        <div class="time-selector-container">
+    <!-- Add HTML content, SVG drawing area, ... -->
+    <h1>GitHub Repositories: One Commit at a Time</h1>
+    <select id="granularity-selector">
+        <option value="month">Month</option>
+        <option value="week">Week</option>
+        <option value="day">Day</option>
+    </select>
+    <div id="app">
+        <svg id="contributor"/>
+        <svg id="timeline"/>
+         <div class="time-selector-container">
           <svg id="time-selector" />
           <div>
             Select Year: <select id="select-year"></select>
           </div>
         </div>
-      </div>
-      <svg id="file-tree" />
+        <svg id="file-tree"/>
     </div>
+    <div id="tooltip"></div>
 
   </div>
   <div id="time-selector-tooltip"></div>
