@@ -1,7 +1,7 @@
 class ContributorVis {
     constructor(_config, _dispatcher, _data) {
         const container = document.getElementById(_config.parentElement.substring(1));
-        
+
         // TODO: Add config defaults
         this.config = {
             parentElement: _config.parentElement,
@@ -84,7 +84,7 @@ class ContributorVis {
             .scalePow()
             .exponent(0.5)
             .domain([0, maxTotal])
-            .range([5, 100]);
+            .range([5, 50]);
 
         const threshold = 0; // Adjust the threshold as needed (if we want fewer circles)
 
