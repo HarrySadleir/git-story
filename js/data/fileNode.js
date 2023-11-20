@@ -6,11 +6,73 @@ class FileNode {
      * @type {Array<FileNode>}
      */
     children = [];
+    expanded = false;
     changesCount = 0;
 
     constructor(name, parentPath) {
         this.name = name;
         this.parentPath = parentPath;
+    }
+
+    expandIfAtDepth(depth, currDepth) {
+        this.setExpanded(currDepth <= depth);
+
+        if (currDepth === depth) {
+            return;
+        }
+
+        this.children.forEach(child => child.expandIfAtDepth(depth, currDepth + 1))
+    }
+
+    toggleExpanded() {
+        this.setExpanded(!this.expanded);
+    }
+
+    setExpanded(expanded) {
+        if (this.children.length === 0) {
+            return;
+        }
+
+        if (this.expanded === expanded) {
+            return;
+        }
+
+        this.expanded = expanded;
+
+        if (!expanded) {
+            this.children
+                .filter(c => c.expanded)
+                .forEach(c => c.setExpanded(false));
+        }
+    }
+
+    getChangesCount() {
+        let totalChanges = this.changesCount;
+
+        for (const child of this.children) {
+            if (!child.expanded) {
+                totalChanges += child.getChangesCount();
+            }
+        }
+
+        return totalChanges;
+    }
+
+    createInnerHierarchyNode(depth, maxDepth) {
+        const includingChildren = depth < maxDepth && this.isDirectory();
+
+        return {
+            name: this.name,
+            changesCount: includingChildren ? 0 : this.getChangesCount(),
+            depth: depth,
+            data: this,
+            children: includingChildren ?
+                this.children.filter(c => !c.expanded).map(c => c.createInnerHierarchyNode(depth + 1, maxDepth)) : []
+        };
+    }
+
+    isDirectory() {
+        return this.children.length > 0;
     }
 
     getFullyQualifiedPath() {

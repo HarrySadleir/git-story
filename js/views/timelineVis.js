@@ -2,10 +2,12 @@ class TimelineVis {
 
 	constructor(_config, _data) {
 		// TODO: Add config defaults
+        const container = document.getElementById(_config.parentElement.substring(1));
+
 		this.config = this.config = {
 			parentElement: _config.parentElement,
-			containerWidth: _config.containerWidth || 600,
-			containerHeight: _config.containerHeight || 300,
+			containerWidth: _config.containerWidth || container.clientWidth,
+			containerHeight: _config.containerHeight || container.clientHeight,
 			margin: _config.margin || {top: 20, right: 20, bottom: 20, left: 20}
 		};
 		this.data = _data;
