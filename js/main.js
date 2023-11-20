@@ -9,32 +9,46 @@ const dispatcher = d3.dispatch('filterDates', 'filterContributors');
  * Load data from CSV file asynchronously and render charts
  */
 d3.dsv('%', 'data/processed_dataset.dsv')
-	.then(_data => {
-        data = new GitData(_data);
+  .then((_data) => {
+    data = new GitData(_data);
 
-		// TODO: common scales, other shared behaviour
+    // TODO: common scales, other shared behaviour
 
-		timelineVis = new TimelineVis({
-			parentElement: '#timeline',
-		}, data);
-		timelineVis.updateVis();
+    timelineVis = new TimelineVis(
+      {
+        parentElement: '#timeline',
+      },
+      data
+    );
+    timelineVis.updateVis();
 
-		timeSelectorVis = new TimeSelectorVis({
-			parentElement: '#time-selector',
-		}, dispatcher, data);
-		timeSelectorVis.updateVis();
+    timeSelectorVis = new TimeSelectorVis(
+      {
+        parentElement: '#time-selector',
+      },
+      dispatcher,
+      data
+    );
+    timeSelectorVis.updateVis();
 
-		contributorVis =  new ContributorVis({
-			parentElement: '#contributor',
-		}, dispatcher, data);
-		contributorVis.updateVis();
+    contributorVis = new ContributorVis(
+      {
+        parentElement: '#contributor',
+      },
+      dispatcher,
+      data
+    );
+    contributorVis.updateVis();
 
-		fileTreeVis =  new FileTreeVis({
-			parentElement: '#file-tree',
-		}, data);
-		fileTreeVis.updateVis();
-	})
-	.catch(error => console.error(error));
+    fileTreeVis = new FileTreeVis(
+      {
+        parentElement: '#file-tree',
+      },
+      data
+    );
+    fileTreeVis.updateVis();
+  })
+  .catch((error) => console.error(error));
 
 /**
  * Dispatcher waits for 'filterDates' event
@@ -56,6 +70,11 @@ dispatcher.on('filterDates', _dateRange => {
 	// Update fileTreeVis
 	fileTreeVis.data = filteredData;
 	fileTreeVis.updateVis();
+
+  if(_dateRange.length === 0) {
+    timeSelectorVis.selectedPeriod = [];
+  }
+  timeSelectorVis.updateVis();
 });
 
 /**

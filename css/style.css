@@ -1,5 +1,5 @@
 h1 {
-    font-size: 22px;
+  font-size: 22px;
 }
 
 html {
@@ -47,11 +47,67 @@ body {
 }
 
 .beside {
-    display: flex;
-    flex-direction: row;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
 }
 
-/* Tooltip */
+.time-selector-container {
+  border: 1px solid rgb(222, 222, 222);
+  padding: 10px 5px 0 5px;
+  border-radius: 5px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#time-selector-tooltip {
+  position: absolute;
+  display: none;
+  background: #212529;
+  border-radius: 5px;
+  font-size: 6px;
+  font-weight: 500;
+  padding: 8px;
+  min-width: 80px;
+  color: white;
+}
+
+.domain {
+  display: none;
+}
+
+.months-label {
+  font-size: 12px;
+}
+
+.time-selector-y-axis {
+  transform: translate(0, -3px);
+}
+
+.block {
+  cursor: pointer;
+  stroke: #e0e2e5;
+  stroke-width: 0.5;
+}
+
+.block:hover {
+  stroke: black;
+}
+
+.block-selected {
+  stroke: #2a9adb;
+  stroke-width: 1;
+}
+
+.time-selector-active {
+  stroke: #2a9adb;
+  stroke-width: 1;
+}
+
+.contribution-label {
+  font-size: 8px;
+}
 
 #tooltip {
     position: absolute;
