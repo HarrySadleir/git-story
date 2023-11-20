@@ -97,6 +97,7 @@ class GitData {
         const contributors = d3.rollups(this.rawCommits, d => d, d => d.authorName);
 
         return contributors.map(c => {
+            console.log(c)
             return {
                 contributorName: c[0],
                 contributorEmails: [...new Set(c[1].map(c => c.authorEmail))],

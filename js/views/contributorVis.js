@@ -1,206 +1,189 @@
 class ContributorVis {
-  constructor(_config, _dispatcher, _data) {
-    // TODO: Add config defaults
-    this.config = {
-      parentElement: _config.parentElement,
-      containerWidth: _config.containerWidth || 1000,
-      containerHeight: _config.containerHeight || 600,
-      margin: _config.margin || { top: 20, right: 20, bottom: 20, left: 20 },
-      tooltipPadding: 15,
-    };
-    this.dispatcher = _dispatcher;
-    this.data = _data;
+    constructor(_config, _dispatcher, _data) {
+        // TODO: Add config defaults
+        this.config = {
+            parentElement: _config.parentElement,
+            containerWidth: _config.containerWidth || 1000,
+            containerHeight: _config.containerHeight || 600,
+            margin: _config.margin || { top: 20, right: 20, bottom: 20, left: 20 },
+            tooltipPadding: 15,
+        };
+        this.dispatcher = _dispatcher;
+        this.data = _data;
 
-    this.initVis();
-  }
+        this.initVis();
+    }
 
-  /**
-   * Initialize scales/axes and append static chart elements
-   */
-  initVis() {
-    let vis = this;
+    /**
+     * Initialize scales/axes and append static chart elements
+     */
+    initVis() {
+        let vis = this;
 
-    vis.width =
-      vis.config.containerWidth -
-      vis.config.margin.left -
-      vis.config.margin.right;
-    vis.height =
-      vis.config.containerHeight -
-      vis.config.margin.top -
-      vis.config.margin.bottom;
+        vis.width =
+            vis.config.containerWidth -
+            vis.config.margin.left -
+            vis.config.margin.right;
+        vis.height =
+            vis.config.containerHeight -
+            vis.config.margin.top -
+            vis.config.margin.bottom;
 
-    // Define size of SVG drawing area
-    vis.svg = d3
-      .select(vis.config.parentElement)
-      .attr("width", vis.config.containerWidth)
-      .attr("height", vis.config.containerHeight);
+        // Define size of SVG drawing area
+        vis.svg = d3
+            .select(vis.config.parentElement)
+            .attr("width", vis.config.containerWidth)
+            .attr("height", vis.config.containerHeight);
 
-    vis.chartArea = vis.svg
-      .append("g")
-      .attr(
-        "transform",
-        `translate(${vis.config.margin.left},${vis.config.margin.top})`
-      );
+        vis.chartArea = vis.svg
+            .append("g")
+            .attr(
+                "transform",
+                `translate(${vis.config.margin.left},${vis.config.margin.top})`
+            );
 
-    vis.chart = vis.chartArea.append("g");
-  }
+        vis.chart = vis.chartArea.append("g");
+    }
 
-  /**
-   * Prepare the data and scales before we render it.
-   */
-  updateVis() {
-    let vis = this;
+    /**
+     * Prepare the data and scales before we render it.
+     */
+    updateVis() {
+        let vis = this;
 
-    const authorData = d3.rollup(
-      this.data.rawCommits,
-      (v) => ({
-        totalInsertions: d3.sum(v, (d) => d.insertions),
-        totalDeletions: d3.sum(v, (d) => d.deletions),
-      }),
-      (d) => d.authorName
-    );
+        console.log(this.data.getContributors())
 
-    vis.authors = Array.from(
-      authorData,
-      ([authorName, { totalInsertions, totalDeletions }]) => ({
-        authorName,
-        totalInsertions,
-        totalDeletions,
-      })
-    );
+        const authorData = d3.rollup(
+            this.data.rawCommits,
+            (v) => ({
+                totalInsertions: d3.sum(v, (d) => d.insertions),
+                totalDeletions: d3.sum(v, (d) => d.deletions),
+            }),
+            (d) => d.authorName
+        );
 
-    // Calculate the maximum total insertions and deletions to determine the scaling factor
-    const maxTotal = d3.max(
-      this.authors,
-      (d) => d.totalInsertions + d.totalDeletions
-    );
+        vis.authors = Array.from(
+            authorData,
+            ([authorName, { totalInsertions, totalDeletions }]) => ({
+                authorName,
+                totalInsertions,
+                totalDeletions,
+            })
+        );
 
-    // Define a scale function to scale down the circle sizes
-    // const scale = d3.scaleLinear().domain([0, maxTotal]).range([5, 100]); // Linear makes more sense, but makes for a less interesting visualization (many circles besides the largest two are the same size)
-    vis.scale = d3
-      .scalePow()
-      .exponent(0.5)
-      .domain([0, maxTotal])
-      .range([5, 100]);
+        // Calculate the maximum total insertions and deletions to determine the scaling factor
+        const maxTotal = d3.max(
+            this.authors,
+            (d) => d.totalInsertions + d.totalDeletions
+        );
 
-    const threshold = 0; // Adjust the threshold as needed (if we want fewer circles)
+        // Define a scale function to scale down the circle sizes
+        vis.scale = d3
+            .scalePow()
+            .exponent(0.5)
+            .domain([0, maxTotal])
+            .range([5, 100]);
 
-    vis.filteredAuthors = this.authors.filter(
-      (d) => d.totalInsertions + d.totalDeletions >= threshold
-    );
+        const threshold = 0; // Adjust the threshold as needed (if we want fewer circles)
 
-    vis.renderVis();
-  }
+        vis.filteredAuthors = this.authors.filter(
+            (d) => d.totalInsertions + d.totalDeletions >= threshold
+        );
 
-  /**
-   * Bind data to visual elements
-   */
-  renderVis() {
-    let vis = this;
+        vis.renderVis();
+    }
 
-    let node = vis.chart
-      .selectAll("circle")
-      .data(vis.filteredAuthors, (d) => d.authorName)
-      .join("circle")
-      .attr("r", (d) => vis.scale(d.totalInsertions + d.totalDeletions))
-      .attr("fill", (d) => {
-        if (selectedContributors.includes(d.authorName)) {
-          return "orange";
-        } else {
-          return "#69a2b2";
-        }
-      })
-      .style("fill-opacity", 0.3)
-      .attr("stroke", "#69a2b2")
-      .style("stroke-width", 4);
+    /**
+     * Bind data to visual elements
+     */
+    renderVis() {
+        let vis = this;
 
-    node
-      .on("mouseover", (event, d) => {
-        d3
-          .select("#tooltip")
-          .style("display", "block")
-          .style("left", event.pageX + vis.config.tooltipPadding + "px")
-          .style("top", event.pageY + vis.config.tooltipPadding + "px").html(`
+        let node = vis.chart
+            .selectAll("circle")
+            .data(vis.filteredAuthors, (d) => d.authorName)
+            .join("circle")
+            .attr("r", (d) => vis.scale(d.totalInsertions + d.totalDeletions))
+            .attr("fill", (d) => {
+                if (selectedContributors.includes(d.authorName)) {
+                    return "orange";
+                } else {
+                    return "#69a2b2";
+                }
+            })
+            .style("fill-opacity", 0.3)
+            .attr("stroke", "#69a2b2")
+            .style("stroke-width", 4);
+
+        node
+            .on("mouseover", (event, d) => {
+                d3
+                    .select("#tooltip")
+                    .style("display", "block")
+                    .style("left", event.pageX + vis.config.tooltipPadding + "px")
+                    .style("top", event.pageY + vis.config.tooltipPadding + "px").html(`
             <div class='tooltip-title'>${d.authorName}</div>
 			<div>Additions: <strong>${d.totalInsertions}</strong></div>
 			<div>Deletions: <strong>${d.totalDeletions}</strong></div>
           `);
-      })
-      .on("mouseleave", () => {
-        d3.select("#tooltip").style("display", "none");
-      });
+            })
+            .on("mouseleave", () => {
+                d3.select("#tooltip").style("display", "none");
+            });
 
-    node.on("click", (event, d) => {
-      if (selectedContributors.includes(d.authorName)) {
-        selectedContributors = selectedContributors.filter(function (
-          e
-        ) {
-          return e !== d.authorName;
+        node.on("click", (event, d) => {
+            if (selectedContributors.includes(d.authorName)) {
+                selectedContributors = selectedContributors.filter(function (e) {
+                    return e !== d.authorName;
+                });
+            } else {
+                selectedContributors.push(d.authorName);
+            }
+
+            vis.dispatcher.call("filterContributors", event, selectedContributors);
         });
-      } else {
-        selectedContributors.push(d.authorName);
-      }
 
-      vis.dispatcher.call(
-        "filterContributors",
-        event,
-        selectedContributors
-      );
-    });
-
-	// Everything below was chatGPT
-    let simulation = d3
-      .forceSimulation(this.filteredAuthors)
-      .force(
-        "center",
-        d3
-          .forceCenter()
-          .x(vis.width / 2)
-          .y(vis.height / 2)
-      )
-      .force("charge", d3.forceManyBody().strength(1))
-      .force(
-        "collide",
-        d3
-          .forceCollide()
-          .strength(1)
-          .radius((d) => vis.scale(d.totalInsertions + d.totalDeletions))
-          .iterations(1)
-      );
-
-    // Calculate the maximum radius of all circles
-    const maxRadius = d3.max(this.authors, (d) =>
-      vis.scale(d.totalInsertions + d.totalDeletions)
-    );
-
-    // Set initial positions from the center outward without overlapping
-    this.authors.forEach((d, i) => {
-      const angle = (i / this.authors.length) * 2 * Math.PI; // Calculate angle based on the number of circles
-      d.x = vis.width / 2 + maxRadius * Math.cos(angle);
-      d.y = vis.height / 2 + maxRadius * Math.sin(angle);
-    });
-
-    // Update the "cx" and "cy" attributes in the tick function
-    simulation.on("tick", function () {
-      node
-        .attr("cx", (d) =>
-          Math.max(
-            vis.scale(d.totalInsertions + d.totalDeletions),
-            Math.min(
-              vis.width - vis.scale(d.totalInsertions + d.totalDeletions),
-              d.x
+        // Everything below was chatGPT
+        let simulation = d3
+            .forceSimulation(this.filteredAuthors)
+            .force(
+                "center",
+                d3
+                    .forceCenter()
+                    .x(vis.width / 2)
+                    .y(vis.height / 2)
             )
-          )
-        )
-        .attr("cy", (d) =>
-          Math.max(
-            vis.scale(d.totalInsertions + d.totalDeletions),
-            Math.min(
-              vis.height - vis.scale(d.totalInsertions + d.totalDeletions),
-              d.y
-            )
-          )
-        );
-    });
-  }
+            .force("charge", d3.forceManyBody().strength(1))
+            .force(
+                "collide",
+                d3
+                    .forceCollide()
+                    .strength(1)
+                    .radius((d) => vis.scale(d.totalInsertions + d.totalDeletions))
+                    .iterations(1)
+            );
+
+        // Update the "cx" and "cy" attributes in the tick function
+        simulation.on("tick", function () {
+            node
+                .attr("cx", (d) =>
+                    Math.max(
+                        vis.scale(d.totalInsertions + d.totalDeletions),
+                        Math.min(
+                            vis.width - vis.scale(d.totalInsertions + d.totalDeletions),
+                            d.x
+                        )
+                    )
+                )
+                .attr("cy", (d) =>
+                    Math.max(
+                        vis.scale(d.totalInsertions + d.totalDeletions),
+                        Math.min(
+                            vis.height - vis.scale(d.totalInsertions + d.totalDeletions),
+                            d.y
+                        )
+                    )
+                );
+        });
+    }
 }
