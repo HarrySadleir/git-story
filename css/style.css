@@ -13,7 +13,7 @@ body {
 
 #app {
     width: 100%;
-    height: calc(100% - 24px);
+    height: calc(100% - 48px);
     display: grid;
     grid: 30% auto 20% / 1fr 1fr;
     grid-template-areas:
