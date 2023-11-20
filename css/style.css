@@ -64,15 +64,24 @@ body {
     padding: 8px;
     min-width: 160px;
     color: #333;
-}
+  }
 
-.tooltip-title {
+  .tooltip-title {
     color: #000;
     font-size: 14px;
     font-weight: 600;
-}
-
-#tooltip ul {
+  }
+  #tooltip ul {
     margin: 5px 0 0 0;
     padding-left: 20px;
+  }
+
+
+/* timelineVis.js */
+.barPos {
+    fill: mediumseagreen;
+}
+
+.barNeg {
+    fill: orangered;
 }

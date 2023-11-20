@@ -83,3 +83,6 @@ dispatcher.on('filterContributors', _selectedContributors => {
 	fileTreeVis.data = filteredData;
 	fileTreeVis.updateVis();
 });
+
+d3.select('#granularity-selector')
+	.on('change', () => timelineVis.updateVis());
