@@ -2,6 +2,50 @@ h1 {
     font-size: 22px;
 }
 
+html {
+    height: 95%;
+}
+
+body {
+    width: 99%;
+    height: 100%;
+}
+
+#app {
+    width: 100%;
+    height: calc(100% - 24px);
+    display: grid;
+    grid: 20% auto 20% / 1fr 1fr;
+    grid-template-areas:
+        "contributor file-tree"
+        "timeline file-tree"
+        "time-selector file-tree";
+}
+
+#contributor {
+    grid-area: contributor;
+    width: 100%;
+    height: 100%;
+}
+
+#timeline {
+    grid-area: timeline;
+    width: 100%;
+    height: 100%;
+}
+
+#time-selector {
+    grid-area: time-selector;
+    width: 100%;
+    height: 100%;
+}
+
+#file-tree {
+    grid-area: file-tree;
+    width: 100%;
+    height: 100%;
+}
+
 .beside {
     display: flex;
     flex-direction: row;
@@ -30,4 +74,4 @@ h1 {
     margin: 5px 0 0 0;
     padding-left: 20px;
   }
-  
+}

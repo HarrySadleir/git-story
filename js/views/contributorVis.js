@@ -1,10 +1,12 @@
 class ContributorVis {
     constructor(_config, _dispatcher, _data) {
+        const container = document.getElementById(_config.parentElement.substring(1));
+        
         // TODO: Add config defaults
         this.config = {
             parentElement: _config.parentElement,
-            containerWidth: _config.containerWidth || 1000,
-            containerHeight: _config.containerHeight || 600,
+            containerWidth: _config.containerWidth || container.clientWidth,
+            containerHeight: _config.containerHeight || container.clientHeight,
             margin: _config.margin || { top: 20, right: 20, bottom: 20, left: 20 },
             tooltipPadding: 15,
         };
