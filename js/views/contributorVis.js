@@ -53,8 +53,6 @@ class ContributorVis {
     updateVis() {
         let vis = this;
 
-        console.log(this.data.getContributors())
-
         const authorData = d3.rollup(
             this.data.rawCommits,
             (v) => ({
