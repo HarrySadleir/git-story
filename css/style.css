@@ -9,6 +9,9 @@ html {
 body {
     width: 99%;
     height: 100%;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 13px;
+    font-weight: 400;
 }
 
 #app {
