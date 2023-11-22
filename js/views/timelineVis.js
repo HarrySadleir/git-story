@@ -7,7 +7,7 @@ class TimelineVis {
 			parentElement: _config.parentElement,
 			containerWidth: _config.containerWidth || container.clientWidth,
 			containerHeight: _config.containerHeight || container.clientHeight,
-			margin: _config.margin || {top: 20, right: 20, bottom: 60, left: 50},
+			margin: _config.margin || {top: 0, right: 20, bottom: 60, left: 50},
 			tooltipPadding: 10
 		};
 		this.data = _data;
@@ -68,17 +68,28 @@ class TimelineVis {
 			.attr('transform', `translate(0,${vis.height / 2})`);
 	}
 
-	/**
+    /**
 	 * Prepare the data and scales before we render it.
 	 */
 	updateVis() {
 		let vis = this;
-		vis.rolledData = data.getGroupCommits(
-			d3.select('#granularity-selector').property('value')
-		);
+        let granularity = d3.select('#granularity-selector').property('value')
+		vis.rolledData = data.getGroupCommits(granularity);
 
-		// Adjust scales based off the maximum stack size
-		vis.xScale.domain(vis.rolledData.map(d => d[0]));
+        // TODO: Temporary measure to get date filtering working now. This should probably be abstracted out to GitData.
+        if (dateRange.length === 2) {
+            vis.rolledData = vis.rolledData.filter((d) => {
+                return (dateRange[0] <= d[0] && d[0] <= dateRange[1]);
+            })
+        }
+
+        // Adjust scales based off the maximum stack size and date range
+        const populatedDateRange = this.generateDateRange(
+            vis.rolledData[0][0],
+            vis.rolledData[vis.rolledData.length-1][0],
+            granularity
+        );
+		vis.xScale.domain(populatedDateRange);
 		let maximalRange = d3.max([
 			d3.max(vis.rolledData, group => d3.sum(group[1], d => d.insertions || 0)),
 			d3.max(vis.rolledData, group => d3.sum(group[1], d => d.deletions || 0))
@@ -100,11 +111,11 @@ class TimelineVis {
 		});
 
 		// Only display some labels on the x-axis to avoid cluttering it. A bit of a nasty trick but oh well.
-		const maxLabels = 25; // TODO: Adjust this value as needed when screen size changes
-		const numTicks = Math.min(maxLabels, vis.rolledData.length);
-		const tickStep = Math.ceil(vis.rolledData.length / numTicks);
-		const tickValues = vis.rolledData.map((d, i) => {
-			return i % tickStep === 0 ? d[0] : null;
+		const maxLabels = 25;
+		const numTicks = Math.min(maxLabels, populatedDateRange.length);
+		const tickStep = Math.ceil(populatedDateRange.length / numTicks);
+		const tickValues = populatedDateRange.map((d, i) => {
+			return i % tickStep === 0 ? d : null;
 		}).filter(d => {
 			return d !== null;
 		});
@@ -123,7 +134,8 @@ class TimelineVis {
 			.data(vis.rolledData, d => d[0])
 			.join('g')
 			.attr('class', 'stack')
-			.attr('transform', d => `translate(${vis.xScale(d[0])},0)`);
+			.attr('transform', d => `translate(${vis.xScale(d[0])},0)`)
+            .attr('width', vis.xScale.bandwidth());
 
 		// Level 2a, insertion bars
 		vis.posBars = vis.stacks.selectAll('.barPos')
@@ -171,4 +183,39 @@ class TimelineVis {
 			.attr("transform", "translate(-8, 3) rotate(-45) ")
 			.style("text-anchor", "end");
 	}
+
+    /**
+     * Produce a populated array of dates based on the given start and end dates, with a date at $granularity increments
+     * @param startDate
+     * @param endDate
+     * @param granularity
+     * @returns An array of Date objects
+     */
+    generateDateRange(startDate, endDate, granularity) {
+        // Copy constructors are to avoid monkeying with the inputs
+        let currentDate = new Date(startDate);
+        const _endDate = new Date(endDate);
+        const dateArray = [];
+
+        while (currentDate <= _endDate) {
+            dateArray.push(new Date(currentDate));
+
+            switch (granularity) {
+                case "month":
+                    currentDate.setMonth(currentDate.getMonth() + 1);
+                    break;
+                case "week":
+                    currentDate.setDate(currentDate.getDate() + 7);
+                    break;
+                case "day":
+                    currentDate.setDate(currentDate.getDate() + 1);
+                    break;
+                default:
+                    console.error("Invalid granularity");
+                    return [];
+            }
+        }
+
+        return dateArray;
+    }
 }
