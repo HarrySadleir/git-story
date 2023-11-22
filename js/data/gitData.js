@@ -91,7 +91,7 @@ class GitData {
 
     /**
      * Produces an array containing all contributors and their number of contributions over the given data.
-     * @returns {Array<{contributorName: string, contributorEmails: Array<String>, numContributions: number}>}
+     * @returns {Array<{contributorName: string, contributorEmails: Array<String>, numContributions: number, totalInsertions: number, totalDeletions: number}>}
      */
     getContributors() {
         const contributors = d3.rollups(this.rawCommits, d => d, d => d.authorName);
@@ -100,7 +100,9 @@ class GitData {
             return {
                 contributorName: c[0],
                 contributorEmails: [...new Set(c[1].map(c => c.authorEmail))],
-                numContributions: c[1].length
+                numContributions: c[1].length,
+                totalInsertions: d3.sum(c[1], d => d.insertions),
+                totalDeletions: d3.sum(c[1], d => d.deletions)
             };
         });
     }

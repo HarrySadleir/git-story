@@ -53,23 +53,7 @@ class ContributorVis {
     updateVis() {
         let vis = this;
 
-        const authorData = d3.rollup(
-            this.data.rawCommits,
-            (v) => ({
-                totalInsertions: d3.sum(v, (d) => d.insertions),
-                totalDeletions: d3.sum(v, (d) => d.deletions),
-            }),
-            (d) => d.authorName
-        );
-
-        vis.authors = Array.from(
-            authorData,
-            ([authorName, { totalInsertions, totalDeletions }]) => ({
-                authorName,
-                totalInsertions,
-                totalDeletions,
-            })
-        );
+        vis.authors = this.data.getContributors();
 
         // Calculate the maximum total insertions and deletions to determine the scaling factor
         const maxTotal = d3.max(
@@ -123,20 +107,20 @@ class ContributorVis {
             .attr("cx", (d) => d.x)
             .attr("cy", (d) => d.y)
             .attr("r", (d) => vis.scale(d.value))
-            .attr("fill", (d) => selectedContributors.includes(d.data.authorName) ? "orange" : "white")
+            .attr("fill", (d) => selectedContributors.includes(d.data.contributorName) ? "orange" : "white")
             .style("fill-opacity", 0.3)
             .attr("stroke", "black")
             .style("stroke-width", 1.5);
 
         node
             .on("mouseover", (event, d) => {
-                if (d.data.authorName) {
+                if (d.data.contributorName) {
                     d3
                         .select("#tooltip")
                         .style("display", "block")
                         .style("left", event.pageX + vis.config.tooltipPadding + "px")
                         .style("top", event.pageY + vis.config.tooltipPadding + "px").html(`
-                    <div class='tooltip-title'>${d.data.authorName}</div>
+                    <div class='tooltip-title'>${d.data.contributorName}</div>
                     <div>Additions: <strong>${d.data.totalInsertions}</strong></div>
                     <div>Deletions: <strong>${d.data.totalDeletions}</strong></div>
                   `);
@@ -147,13 +131,13 @@ class ContributorVis {
             });
 
         node.on("click", (event, d) => {
-            if (d.data.authorName) {
-                if (selectedContributors.includes(d.data.authorName)) {
+            if (d.data.contributorName) {
+                if (selectedContributors.includes(d.data.contributorName)) {
                     selectedContributors = selectedContributors.filter(function (e) {
-                        return e !== d.data.authorName;
+                        return e !== d.data.contributorName;
                     });
                 } else {
-                    selectedContributors.push(d.data.authorName);
+                    selectedContributors.push(d.data.contributorName);
                 }
 
                 vis.dispatcher.call("filterContributors", event, selectedContributors);
