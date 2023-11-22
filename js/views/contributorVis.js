@@ -44,6 +44,9 @@ class ContributorVis {
                 `translate(${vis.config.margin.left},${vis.config.margin.top})`
             );
 
+        vis.colorScale = d3.scaleOrdinal(d3.schemeCategory10);
+
+
         vis.chart = vis.chartArea.append("g");
     }
 
@@ -53,23 +56,7 @@ class ContributorVis {
     updateVis() {
         let vis = this;
 
-        const authorData = d3.rollup(
-            this.data.rawCommits,
-            (v) => ({
-                totalInsertions: d3.sum(v, (d) => d.insertions),
-                totalDeletions: d3.sum(v, (d) => d.deletions),
-            }),
-            (d) => d.authorName
-        );
-
-        vis.authors = Array.from(
-            authorData,
-            ([authorName, { totalInsertions, totalDeletions }]) => ({
-                authorName,
-                totalInsertions,
-                totalDeletions,
-            })
-        );
+        vis.authors = this.data.getContributors();
 
         // Calculate the maximum total insertions and deletions to determine the scaling factor
         const maxTotal = d3.max(
@@ -99,91 +86,86 @@ class ContributorVis {
     renderVis() {
         let vis = this;
 
+        // Create a hierarchy from the data
+        const hierarchyData = d3.hierarchy({ children: vis.filteredAuthors })
+            .sum((d) => d.totalInsertions + d.totalDeletions);
+
+        // Use d3.pack() to pack circles
+        const pack = d3.pack()
+            .size([vis.width, vis.height])
+            .padding(5) // Increase padding to spread circles further apart
+            .radius((d) => {
+                // Set a minimum radius to prevent circles from becoming too small
+                return Math.max(5, vis.scale(d.value));
+            });
+
+        // Pack the circles and get the updated hierarchy
+        const packedData = pack(hierarchyData);
+
+        // Bind data to visual elements (use packedData.descendants() to get the circles)
         let node = vis.chart
             .selectAll("circle")
-            .data(vis.filteredAuthors, (d) => d.authorName)
+            .data(packedData.descendants().slice(1)) // Include all descendants
             .join("circle")
-            .attr("r", (d) => vis.scale(d.totalInsertions + d.totalDeletions))
+            .attr("cx", (d) => d.x)
+            .attr("cy", (d) => d.y)
+            .attr("r", (d) => vis.scale(d.value))
             .attr("fill", (d) => {
-                if (selectedContributors.includes(d.authorName)) {
-                    return "orange";
-                } else {
-                    return "#69a2b2";
+                if (d.data.contributorName) {
+                    const index = selectedContributors.findIndex(contributor => contributor.name === d.data.contributorName);
+                    if (index !== -1) {
+                        // Contributor is already selected, remove it
+                        return vis.colorScale(d.data.contributorName)
+                    } else {
+                        // Contributor is not selected, add it
+                        return "white"
+                    }
                 }
             })
             .style("fill-opacity", 0.3)
-            .attr("stroke", "#69a2b2")
-            .style("stroke-width", 4);
+            .attr("stroke", "black")
+            .style("stroke-width", 1.5);
 
         node
             .on("mouseover", (event, d) => {
-                d3
-                    .select("#tooltip")
-                    .style("display", "block")
-                    .style("left", event.pageX + vis.config.tooltipPadding + "px")
-                    .style("top", event.pageY + vis.config.tooltipPadding + "px").html(`
-            <div class='tooltip-title'>${d.authorName}</div>
-			<div>Additions: <strong>${d.totalInsertions}</strong></div>
-			<div>Deletions: <strong>${d.totalDeletions}</strong></div>
-          `);
+                if (d.data.contributorName) {
+                    d3
+                        .select("#tooltip")
+                        .style("display", "block")
+                        .style("left", event.pageX + vis.config.tooltipPadding + "px")
+                        .style("top", event.pageY + vis.config.tooltipPadding + "px").html(`
+                    <div class='tooltip-title'>${d.data.contributorName}</div>
+                    <div>Additions: <strong>${d.data.totalInsertions}</strong></div>
+                    <div>Deletions: <strong>${d.data.totalDeletions}</strong></div>
+                  `);
+                }
             })
             .on("mouseleave", () => {
                 d3.select("#tooltip").style("display", "none");
             });
 
         node.on("click", (event, d) => {
-            if (selectedContributors.includes(d.authorName)) {
-                selectedContributors = selectedContributors.filter(function (e) {
-                    return e !== d.authorName;
-                });
-            } else {
-                selectedContributors.push(d.authorName);
+            if (d.data.contributorName) {
+                const contributorName = d.data.contributorName;
+                const color = vis.colorScale(contributorName);
+                const contributorObj = { name: contributorName, color: color };
+
+                // Check if contributor is already selected
+                const index = selectedContributors.findIndex(contributor => contributor.name === contributorName);
+
+                if (index !== -1) {
+                    // Contributor is already selected, remove it
+                    selectedContributors.splice(index, 1);
+                } else {
+                    // Contributor is not selected, add it
+                    if (selectedContributors.length < 10) {
+                        selectedContributors.push(contributorObj);
+                    }
+                }
+
+                vis.dispatcher.call("filterContributors", event, selectedContributors);
             }
-
-            vis.dispatcher.call("filterContributors", event, selectedContributors);
         });
 
-        // Everything below was chatGPT
-        let simulation = d3
-            .forceSimulation(this.filteredAuthors)
-            .force(
-                "center",
-                d3
-                    .forceCenter()
-                    .x(vis.width / 2)
-                    .y(vis.height / 2)
-            )
-            .force("charge", d3.forceManyBody().strength(1))
-            .force(
-                "collide",
-                d3
-                    .forceCollide()
-                    .strength(1)
-                    .radius((d) => vis.scale(d.totalInsertions + d.totalDeletions))
-                    .iterations(1)
-            );
-
-        // Update the "cx" and "cy" attributes in the tick function
-        simulation.on("tick", function () {
-            node
-                .attr("cx", (d) =>
-                    Math.max(
-                        vis.scale(d.totalInsertions + d.totalDeletions),
-                        Math.min(
-                            vis.width - vis.scale(d.totalInsertions + d.totalDeletions),
-                            d.x
-                        )
-                    )
-                )
-                .attr("cy", (d) =>
-                    Math.max(
-                        vis.scale(d.totalInsertions + d.totalDeletions),
-                        Math.min(
-                            vis.height - vis.scale(d.totalInsertions + d.totalDeletions),
-                            d.y
-                        )
-                    )
-                );
-        });
     }
 }
