@@ -44,6 +44,9 @@ class ContributorVis {
                 `translate(${vis.config.margin.left},${vis.config.margin.top})`
             );
 
+        vis.colorScale = d3.scaleOrdinal(d3.schemeCategory10);
+
+
         vis.chart = vis.chartArea.append("g");
     }
 
@@ -107,7 +110,18 @@ class ContributorVis {
             .attr("cx", (d) => d.x)
             .attr("cy", (d) => d.y)
             .attr("r", (d) => vis.scale(d.value))
-            .attr("fill", (d) => selectedContributors.includes(d.data.contributorName) ? "orange" : "white")
+            .attr("fill", (d) => {
+                if (d.data.contributorName) {
+                    const index = selectedContributors.findIndex(contributor => contributor.name === d.data.contributorName);
+                    if (index !== -1) {
+                        // Contributor is already selected, remove it
+                        return vis.colorScale(d.data.contributorName)
+                    } else {
+                        // Contributor is not selected, add it
+                        return "white"
+                    }
+                }
+            })
             .style("fill-opacity", 0.3)
             .attr("stroke", "black")
             .style("stroke-width", 1.5);
@@ -132,16 +146,26 @@ class ContributorVis {
 
         node.on("click", (event, d) => {
             if (d.data.contributorName) {
-                if (selectedContributors.includes(d.data.contributorName)) {
-                    selectedContributors = selectedContributors.filter(function (e) {
-                        return e !== d.data.contributorName;
-                    });
+                const contributorName = d.data.contributorName;
+                const color = vis.colorScale(contributorName);
+                const contributorObj = { name: contributorName, color: color };
+
+                // Check if contributor is already selected
+                const index = selectedContributors.findIndex(contributor => contributor.name === contributorName);
+
+                if (index !== -1) {
+                    // Contributor is already selected, remove it
+                    selectedContributors.splice(index, 1);
                 } else {
-                    selectedContributors.push(d.data.contributorName);
+                    // Contributor is not selected, add it
+                    if (selectedContributors.length < 10) {
+                        selectedContributors.push(contributorObj);
+                    }
                 }
 
                 vis.dispatcher.call("filterContributors", event, selectedContributors);
             }
         });
+
     }
 }
