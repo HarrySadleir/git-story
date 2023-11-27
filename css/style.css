@@ -53,18 +53,6 @@ body {
     height: 100%;
 }
 
-#time-selector-tooltip {
-    position: absolute;
-    display: none;
-    background: #212529;
-    border-radius: 5px;
-    font-size: 6px;
-    font-weight: 500;
-    padding: 8px;
-    min-width: 80px;
-    color: white;
-}
-
 .domain {
     display: none;
 }
