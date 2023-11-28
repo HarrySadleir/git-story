@@ -43,6 +43,7 @@ body {
     justify-content: center;
 }
 
+/* ------------------------------ timeSelectorVis.js ------------------------------- */
 .time-selector-container {
     border: 1px solid rgb(222, 222, 222);
     padding: 10px 5px 0 5px;
@@ -89,6 +90,7 @@ body {
     font-size: 8px;
 }
 
+/* ------------------------------ tooltip ------------------------------- */
 #tooltip {
     position: absolute;
     display: none;
@@ -138,4 +140,9 @@ body {
 
 .barNeg {
     fill: orangered;
+}
+
+/* ------------------------------ fileTreeVis.js ------------------------------- */
+.inner-circle > circle:hover {
+  cursor: pointer;
 }

@@ -179,19 +179,13 @@ class FileTreeVis {
                     .style("left", event.pageX + vis.config.tooltipPadding + "px")
                     .style("top", event.pageY + vis.config.tooltipPadding + "px").html(`
                       <div class='tooltip-title'>${d.data.name}</div>
-                      <p># of Changes: ${d.data.changesCount}</p>
+                      <p># of Commits: ${d.data.data.getChangesCount()}</p>
               `);
           })
             .on('mouseleave', (event, d) => {
                 d3.select('#tooltip').style('display', 'none');
                 d3.select(event.currentTarget).attr('fill', d => d.data.data.isDirectory() ? null : vis.colorScale(d.data.name.substring(d.data.name.lastIndexOf("."))))
             })
-
-        innerCircleGroup
-            .selectAll("title")
-            .data(d => [d])
-            .join("title")
-            .text(d => d.data.data.getFullyQualifiedPath());
 
         innerCircleGroup
             .selectAll(".inner-title")
