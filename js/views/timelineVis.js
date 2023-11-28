@@ -76,6 +76,11 @@ class TimelineVis {
         let granularity = d3.select('#granularity-selector').property('value')
 		vis.rolledData = data.getGroupCommits(granularity);
 
+		// no data within the selected time range
+		if (vis.rolledData.length == 0) {
+			return;
+		}
+
         // TODO: Temporary measure to get date filtering working now. This should probably be abstracted out to GitData.
         if (dateRange.length === 2) {
             vis.rolledData = vis.rolledData.filter((d) => {

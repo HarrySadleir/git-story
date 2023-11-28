@@ -58,18 +58,18 @@ d3.dsv('%', 'data/processed_dataset.dsv')
 dispatcher.on('filterDates', _dateRange => {
     // TODO: Properly filter the data both based on this event and the currently selected contributors
     dateRange = _dateRange;
-    let filteredData = data; // data.filter(... dateRange, selectedContributors)
+    data.filterData(selectedContributors, dateRange);
 
     // Update timelineVis
-    timelineVis.data = filteredData;
+    timelineVis.data = data;
     timelineVis.updateVis();
 
     // Update contributorVis
-    contributorVis.data = filteredData;
+    contributorVis.data = data;
     contributorVis.updateVis();
 
     // Update fileTreeVis
-    fileTreeVis.data = filteredData;
+    fileTreeVis.data = data;
     fileTreeVis.updateVis();
 
     if (_dateRange.length === 0) {
@@ -83,24 +83,23 @@ dispatcher.on('filterDates', _dateRange => {
  * We filter data based on the selected date range and update the timeline, file tree, and (maybe?) time selector vises
  */
 dispatcher.on('filterContributors', _selectedContributors => {
-    // TODO: Properly filter the data both based on this event and the currently selected date range
     selectedContributors = _selectedContributors;
-    let filteredData = data; // data.filter(... dateRange, selectedContributors)
+    data.filterData(selectedContributors, dateRange);
 
     // Update timelineVis
-    timelineVis.data = filteredData;
+    timelineVis.data = data;
     timelineVis.updateVis();
 
     // Update contributorVis
-    contributorVis.data = filteredData;
+    contributorVis.data = data;
     contributorVis.updateVis();
 
     // Update timeSelectorVis. TODO: Not sure if this is needed, but it may be nice to update this too?
-    timeSelectorVis.data = filteredData;
+    timeSelectorVis.data = data;
     timeSelectorVis.updateVis();
 
     // Update fileTreeVis
-    fileTreeVis.data = filteredData;
+    fileTreeVis.data = data;
     fileTreeVis.updateVis();
 });
 
