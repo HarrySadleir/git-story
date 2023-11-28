@@ -13,8 +13,8 @@ class TimeSelectorVis {
         this.fullMonths = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
         this.week = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
         this.contributionColor = ['#EBEDF0', '#9BE9A8', '#41C463', '#30A14E', '#216E39'];
-        this.tooltipLeftPadding = -50;
-        this.tooltipTopPadding = -30;
+        this.tooltipLeftPadding = -100;
+        this.tooltipTopPadding = -40;
         this.selectedYear = null;
         this.selectedPeriod = [];
         this.initVis();
@@ -150,7 +150,7 @@ class TimeSelectorVis {
             .classed('time-selector-active', (d) => this.helper.checkDate(d, this.selectedPeriod) !== -1)
             .on('mouseover', (event, d) => this.helper.mouseOver(event, d, this.fullMonths, vis.tooltipLeftPadding, vis.tooltipTopPadding))
             .on('mouseleave', () => {
-                d3.select('#time-selector-tooltip').style('display', 'none');
+                d3.select('#tooltip').style('display', 'none');
             })
             .on('click', (event, d) => {
                 this.selectedPeriod = this.helper.selectPeriod(vis, d, this.selectedPeriod);

@@ -43,6 +43,7 @@ body {
     justify-content: center;
 }
 
+/* ------------------------------ timeSelectorVis.js ------------------------------- */
 .time-selector-container {
     border: 1px solid rgb(222, 222, 222);
     padding: 10px 5px 0 5px;
@@ -51,18 +52,6 @@ body {
     flex-direction: column;
     align-items: center;
     height: 100%;
-}
-
-#time-selector-tooltip {
-    position: absolute;
-    display: none;
-    background: #212529;
-    border-radius: 5px;
-    font-size: 6px;
-    font-weight: 500;
-    padding: 8px;
-    min-width: 80px;
-    color: white;
 }
 
 .domain {
@@ -101,6 +90,7 @@ body {
     font-size: 8px;
 }
 
+/* ------------------------------ tooltip ------------------------------- */
 #tooltip {
     position: absolute;
     display: none;
@@ -150,4 +140,9 @@ body {
 
 .barNeg {
     fill: orangered;
+}
+
+/* ------------------------------ fileTreeVis.js ------------------------------- */
+.inner-circle > circle:hover {
+  cursor: pointer;
 }

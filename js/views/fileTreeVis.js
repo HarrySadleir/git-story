@@ -12,7 +12,8 @@ class FileTreeVis {
 			parentElement: _config.parentElement,
 			containerWidth: _config.containerWidth || container.clientWidth,
 			containerHeight: _config.containerHeight || container.clientHeight,
-			margin: _config.margin || {top: 20, right: 20, bottom: 20, left: 20}
+			margin: _config.margin || {top: 20, right: 20, bottom: 20, left: 20},
+      tooltipPadding: 15,
 		};
 		this.initVis();
         this.updateData(_data);
@@ -158,13 +159,32 @@ class FileTreeVis {
 
                 d.data.data.toggleExpanded();
                 this.updateVis();
-            });
-
-        innerCircleGroup
-            .selectAll("title")
-            .data(d => [d])
-            .join("title")
-            .text(d => d.data.data.getFullyQualifiedPath());
+            })
+            .on("mouseover", (event, d) => {
+              let hoverColor;
+              if (d.data.data.isDirectory()) {
+                hoverColor = 'rgb(193, 193, 193)';
+              } else {
+                const color = vis.colorScale(d.data.name.substring(d.data.name.lastIndexOf("."))).toString();
+                const r = parseInt(color.slice(1, 3), 16) - 50;
+                const g = parseInt(color.slice(3, 5), 16) - 50;
+                const b = parseInt(color.slice(5, 7), 16) - 50;
+                hoverColor = `rgb(${r},${g},${b})`;
+              }
+                d3.select(event.currentTarget).attr('fill', hoverColor);
+                d3
+                    .select("#tooltip")
+                    .style("display", "block")
+                    .style("left", event.pageX + vis.config.tooltipPadding + "px")
+                    .style("top", event.pageY + vis.config.tooltipPadding + "px").html(`
+                      <div class='tooltip-title'>${d.data.name}</div>
+                      <p># of Commits: ${d.data.data.getChangesCount()}</p>
+              `);
+          })
+            .on('mouseleave', (event, d) => {
+                d3.select('#tooltip').style('display', 'none');
+                d3.select(event.currentTarget).attr('fill', d => d.data.data.isDirectory() ? null : vis.colorScale(d.data.name.substring(d.data.name.lastIndexOf("."))))
+            })
 
         innerCircleGroup
             .selectAll(".inner-title")
