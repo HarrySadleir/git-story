@@ -16,6 +16,7 @@ class GitData {
     rawCommits;
     dataWithinDateRange;
     filteredData;
+    dataToUse;
 
     constructor(data) {
         this.rawCommits = data.map(commit => {
@@ -27,6 +28,7 @@ class GitData {
         // go from oldest -> latest
         this.rawCommits.reverse();
         this.dataWithinDateRange = this.rawCommits;
+        this.dataToUse = this.dataWithinDateRange;
         this.filteredData = [];
     }
 
@@ -123,6 +125,8 @@ class GitData {
         } else {
             this.filteredData = this.dataWithinDateRange;
         }
+
+        this.dataToUse = this.filteredData.length > 0 ? this.filteredData : this.dataWithinDateRange;
     }
 
 
@@ -149,10 +153,8 @@ class GitData {
      * @param timeUnit {"day" | "week" | "month"}
      * @returns Array<Array<{}>>
      */
-    getGroupCommits(timeUnit) {
-        const dataToUse = this.filteredData.length > 0 ? this.filteredData : this.dataWithinDateRange;
-        
-        return d3.rollups(dataToUse, d => d, this.#getCommitKey.bind(this, timeUnit))
+    getGroupCommits(timeUnit) {        
+        return d3.rollups(this.dataToUse, d => d, this.#getCommitKey.bind(this, timeUnit))
             .map(g => [new Date(g[0]), g[1]]);
     }
 
@@ -184,9 +186,7 @@ class GitData {
         const rootNode = new FileNode(".", "");
         const latestCommitTime = date.getTime() / 1000;
 
-        const dataToUse = this.filteredData.length > 0 ? this.filteredData : this.dataWithinDateRange;
-
-        for (const commit of dataToUse) {
+        for (const commit of this.rawCommits) {
             if (commit.commitTimeUnix >= latestCommitTime) {
                 break;
             }

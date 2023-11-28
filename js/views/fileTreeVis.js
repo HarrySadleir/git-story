@@ -75,9 +75,6 @@ class FileTreeVis {
 	updateVis() {
 		let vis = this;
 
-        // comment this out to enable the functionality of the fileTreeVis (filtering according to dateRange and selectedContributors will stop working)
-        this.updateData();
-
         const root = d3.hierarchy(this.fileTree);
         const nodes = root.descendants()
             .filter(n => n.data.expanded);
