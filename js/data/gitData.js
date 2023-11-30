@@ -182,6 +182,8 @@ class GitData {
         const rootNode = new FileNode(".", "");
         const latestCommitTime = date.getTime() / 1000;
 
+        const dataToUse = this.filteredData.length > 0 ? this.filteredData : this.dataWithinDateRange;
+
         for (const commit of this.rawCommits) {
             if (commit.commitTimeUnix >= latestCommitTime) {
                 break;
