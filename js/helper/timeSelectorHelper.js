@@ -110,7 +110,7 @@ class TimeSelectorHelper {
         const month = fullMonths[d.day.getMonth()];
         const day = d.day.getDate();
         d3
-            .select('#time-selector-tooltip')
+            .select('#tooltip')
             .style('display', 'block')
             .style('left', event.pageX + tooltipLeftPadding + 'px')
             .style('top', event.pageY + tooltipTopPadding + 'px').html(`

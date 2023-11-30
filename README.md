@@ -23,3 +23,10 @@
 - year selector references: https://codesandbox.io/s/github/UBC-InfoVis/436V-materials/tree/main/case-studies/case-study_measles-and-vaccines?file=/js/main.js:234-384
 
 - creating dropdown in d3 references: https://d3-graph-gallery.com/graph/density_filter.html
+
+
+## fileTreeVis
+
+- converting hex to rgb references: https://learnersbucket.com/examples/interview/convert-hex-color-to-rgb-in-javascript/
+
+- changing color from mouseover references: https://stackoverflow.com/questions/23703089/d3-js-change-color-and-size-on-line-graph-dot-on-mouseover

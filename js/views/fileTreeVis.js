@@ -8,12 +8,12 @@ class FileTreeVis {
 	constructor(_config, _data) {
         const container = document.getElementById(_config.parentElement.substring(1));
 
-		// TODO: Add config defaults
 		this.config = {
 			parentElement: _config.parentElement,
 			containerWidth: _config.containerWidth || container.clientWidth,
 			containerHeight: _config.containerHeight || container.clientHeight,
-			margin: _config.margin || {top: 20, right: 20, bottom: 20, left: 20}
+			margin: _config.margin || {top: 20, right: 20, bottom: 20, left: 20},
+      tooltipPadding: 15,
 		};
 		this.initVis();
         this.updateData(_data);
@@ -48,10 +48,11 @@ class FileTreeVis {
             .force("link", d3.forceLink().id(d => d.data.getFullyQualifiedPath())
                 .distance(l => vis.rScale(l.source.data.getChangesCount()) + vis.rScale(l.target.data.getChangesCount()))
                 .strength(1))
-            .force("charge", d3.forceManyBody().strength(d => -(vis.rScale(d.data.getChangesCount()) * 10)))
+            .force("charge", d3.forceManyBody().strength(d => -(vis.rScale(d.data.getChangesCount()))))
             .force("collide", d3.forceCollide((d) => 20 + vis.rScale(d.data.getChangesCount())))
-            .force("x", d3.forceX().strength(0.3))
-            .force("y", d3.forceY().strength(0.3));
+            .force("x", d3.forceX().strength(0.5))
+            .force("y", d3.forceY().strength(0.3))
+            .force("levelY", d3.forceY(vis.height / 2).strength((d) => Math.min(1, d.depth / 5)));
 
 		// TODO: Implement
 	}
@@ -80,6 +81,10 @@ class FileTreeVis {
             .filter(n => n.data.expanded);
         const links = root.links().filter(l => nodes.indexOf(l.target) !== -1);
 
+        vis.linkScale = d3.scaleLinear()
+            .domain([0, d3.max(nodes.map(n => n.depth))])
+            .range([5, 0]);
+
 		// TODO: Implement
 		vis.renderVis(links, nodes);
 	}
@@ -92,16 +97,10 @@ class FileTreeVis {
 
         vis.simulation?.stop();
 
-        // TODO: preserve old position and velocity in new sim: https://observablehq.com/@d3/modifying-a-force-directed-graph
-        //vis.simulation = ;
-
         let link = vis.linksGroup.selectAll("line");
 
         let node = vis.nodesGroup
             .selectAll(".node-group");
-            // .attr("fill", d => null)
-            // .attr("stroke", d => d.children ? null : "#fff")
-            // .attr("r", d => vis.rScale(d.data.getChangesCount()));
 
         // update simulation
         let old = new Map(node.data().map(d => [d.data.getFullyQualifiedPath(), d]));
@@ -114,7 +113,7 @@ class FileTreeVis {
 
         vis.simulation.nodes(nodes);
         vis.simulation.force("link").links(links);
-        vis.simulation.alpha(1).restart();
+        vis.simulation.alpha(0.10).restart();
 
         node = node.data(nodes, n => n.data.getFullyQualifiedPath())
             .join("g")
@@ -123,7 +122,8 @@ class FileTreeVis {
 
         link = link
             .data(links)
-            .join("line");
+            .join("line")
+            .attr("stroke-width", l => vis.linkScale(l.source.depth));
 
         const innerCircleGroup = node
             .selectAll(".inner-circle")
@@ -148,7 +148,7 @@ class FileTreeVis {
             .data(d => [d])
             .join("circle")
             .attr("fill", d => d.data.data.isDirectory() ? null : vis.colorScale(d.data.name.substring(d.data.name.lastIndexOf("."))))
-            .attr("stroke", "black")
+            .attr("stroke", d => d.data.name === "." ? "green" : "black")
             .attr("r", d => d.r)
             .attr("cx", d => d.x)
             .attr("cy", d => d.y)
@@ -159,13 +159,32 @@ class FileTreeVis {
 
                 d.data.data.toggleExpanded();
                 this.updateVis();
-            });
-
-        innerCircleGroup
-            .selectAll("title")
-            .data(d => [d])
-            .join("title")
-            .text(d => d.data.data.getFullyQualifiedPath());
+            })
+            .on("mouseover", (event, d) => {
+              let hoverColor;
+              if (d.data.data.isDirectory()) {
+                hoverColor = 'rgb(193, 193, 193)';
+              } else {
+                const color = vis.colorScale(d.data.name.substring(d.data.name.lastIndexOf("."))).toString();
+                const r = parseInt(color.slice(1, 3), 16) - 50;
+                const g = parseInt(color.slice(3, 5), 16) - 50;
+                const b = parseInt(color.slice(5, 7), 16) - 50;
+                hoverColor = `rgb(${r},${g},${b})`;
+              }
+                d3.select(event.currentTarget).attr('fill', hoverColor);
+                d3
+                    .select("#tooltip")
+                    .style("display", "block")
+                    .style("left", event.pageX + vis.config.tooltipPadding + "px")
+                    .style("top", event.pageY + vis.config.tooltipPadding + "px").html(`
+                      <div class='tooltip-title'>${d.data.name}</div>
+                      <p># of Commits: ${d.data.data.getChangesCount()}</p>
+              `);
+          })
+            .on('mouseleave', (event, d) => {
+                d3.select('#tooltip').style('display', 'none');
+                d3.select(event.currentTarget).attr('fill', d => d.data.data.isDirectory() ? null : vis.colorScale(d.data.name.substring(d.data.name.lastIndexOf("."))))
+            })
 
         innerCircleGroup
             .selectAll(".inner-title")
@@ -191,7 +210,7 @@ class FileTreeVis {
             .attr("text-anchor", "middle")
             .attr("x", d => vis.rScale(d.data.getChangesCount()))
             .attr("y", -5)
-            .text(d => d.data.name);
+            .text(d => d.depth === 0 ? "Root Folder" : d.data.name);
 
         vis.simulation.on("tick", () => {
             link
@@ -225,7 +244,5 @@ class FileTreeVis {
                 return `translate(${bottomX}, ${bottomY})`
             });
         });
-
-		// TODO: Implement
 	}
 }
