@@ -60,6 +60,13 @@ dispatcher.on('filterDates', _dateRange => {
     dateRange = _dateRange;
     let filteredData = data; // data.filter(... dateRange, selectedContributors)
 
+    const currentGranularity = d3.select('#granularity-selector').property('value')
+    if (dateRange.length === 2 && currentGranularity === "year") {
+        d3.select('#granularity-selector').property('value', 'month')
+    } else if (dateRange.length === 0) {
+        d3.select('#granularity-selector').property('value', 'year')
+    }
+
     // Update timelineVis
     timelineVis.data = filteredData;
     timelineVis.updateVis();

@@ -109,7 +109,7 @@ class GitData {
 
     /**
      * Produces the given data stacked over the given time unit.
-     * @param timeUnit {"day" | "week" | "month"}
+     * @param timeUnit {"day" | "week" | "month" | "year"}
      * @returns Array<Array<{}>>
      */
     getGroupCommits(timeUnit) {
@@ -133,6 +133,11 @@ class GitData {
         if (timeUnit === "month") {
             // use the 1st of the month
             return new Date(date.getFullYear(), date.getMonth(), 1).getTime();
+        }
+
+        if (timeUnit === "year") {
+            // get first day of the year
+            return new Date(date.getFullYear(), 0, 1).getTime()
         }
     }
 
