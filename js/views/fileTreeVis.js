@@ -184,7 +184,12 @@ class FileTreeVis {
                     .style("left", event.pageX + vis.config.tooltipPadding + "px")
                     .style("top", event.pageY + vis.config.tooltipPadding + "px").html(`
                       <div class='tooltip-title'>${d.data.name}</div>
-                      <p># of Commits: ${d.data.data.getChangesCount()}</p>
+                      <p>
+                        <b>Parent:</b> ${d.data.data.parentPath ?? "None"} <br/>
+                        <b># of Commits:</b> ${d.data.data.getChangesCount()}
+                      </p>
+                      ${d.data.data.isDirectory() && d.data.name !== "." ?
+                        `<i>Click to ${d.depth === 0 ? "close" : "expand"} directory</i>` : ""}
               `);
             })
             .on('mouseleave', (event, d) => {
