@@ -199,8 +199,7 @@ class FileTreeVis {
 
         innerCircleGroup
             .selectAll(".inner-title")
-            // todo: figure logic out here for titles
-            .data(d => (d.r >= (d.data.name.length * 3) && d.data.depth !== 0) ? [d] : [])
+            .data(d => (d.r >= (d.data.name.length * 3) && (!d.data.data.isDirectory() || d.depth === 3)) ? [d] : [])
             .join("text")
             .attr("class",  "inner-title")
             .attr("font-size", "12")
