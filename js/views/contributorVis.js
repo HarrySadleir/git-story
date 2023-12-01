@@ -75,7 +75,7 @@ class ContributorVis {
             .scalePow()
             .exponent(0.5)
             .domain([0, maxTotal])
-            .range([5, 50]);
+            .range([5, 40]);
 
         const threshold = 0; // Adjust the threshold as needed (if we want fewer circles)
 
@@ -107,7 +107,8 @@ class ContributorVis {
     renderVis() {
         let vis = this;
 
-        let node = vis.chart.selectAll("circle");
+        let node = vis.chart
+            .selectAll("circle");
 
         vis.simulation.stop();
 
@@ -118,11 +119,13 @@ class ContributorVis {
 
         vis.simulation.nodes(vis.filteredAuthors);
 
-        vis.simulation.alpha(0.05).restart();
+        if (restartSim) {
+            vis.simulation.alpha(0.05).restart();
+        }
 
         // Bind data to visual elements (use packedData.descendants() to get the circles)
         node = node
-            .data(vis.filteredAuthors) // Include all descendants
+            .data(vis.filteredAuthors)
             .join("circle")
             .attr("r", (d) => vis.scale(d.totalInsertions + d.totalDeletions))
             .attr("fill", (d) => {
