@@ -96,7 +96,8 @@ dispatcher.on('filterContributors', _selectedContributors => {
     contributorVis.updateVis();
 
     // Update timeSelectorVis. TODO: Not sure if this is needed, but it may be nice to update this too?
-    timeSelectorVis.data = data;
+    let dataToUse = data.filteredData.length > 0 ? data.filteredData : data.dataWithinDateRange;
+    timeSelectorVis.data = dataToUse;
     timeSelectorVis.updateVis();
 
     // Update fileTreeVis
