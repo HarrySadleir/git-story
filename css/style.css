@@ -52,6 +52,7 @@ body {
     flex-direction: column;
     align-items: center;
     height: 100%;
+    justify-content: center;
 }
 
 .domain {
@@ -130,8 +131,6 @@ body {
 
 #time-selector {
     grid-area: time-selector;
-    width: 100%;
-    height: 100%;
 }
 
 #granularity-selector-p {

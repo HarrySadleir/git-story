@@ -39,7 +39,7 @@ class TimeSelectorVis {
         vis.yAxis = d3.axisLeft(vis.yScale).tickSize(0).tickValues(['Mon', 'Wed', 'Fri']);
         vis.xAxisG = vis.chart.append('g').attr('class', 'axis x-axis').attr('transform', `translate(0,${vis.height})`);
         vis.yAxisG = vis.chart.append('g').attr('class', 'axis y-axis time-selector-y-axis');
-        vis.svg.append('text').attr('class', 'axis-title').attr('x', 250).attr('y', 0).attr('dy', '.71em').text('Contributions');
+        vis.svg.append('text').attr('class', 'axis-title').attr('x', 250).attr('y', 1).attr('dy', '.71em').text('Contributions');
         vis.MonthLabels = vis.chart
             .selectAll('.months-label')
             .data(this.months)
@@ -73,7 +73,7 @@ class TimeSelectorVis {
         vis.svg
             .append('text')
             .attr('class', 'contribution-label')
-            .attr('x', vis.config.containerWidth - 95)
+            .attr('x', vis.config.containerWidth - 100)
             .attr('y', 118)
             .text('Less');
         vis.svg
@@ -82,33 +82,20 @@ class TimeSelectorVis {
             .attr('x', vis.config.containerWidth - 26)
             .attr('y', 118)
             .text('More');
-
-        vis.groupedYears = d3.groups(this.data, (d) => d.commitDate.getFullYear());
-        let dropdown = d3
-            .select('#select-year')
-            .selectAll('yearOptions')
-            .data(vis.groupedYears)
-            .enter()
-            .append('option')
-            .text(function (d) {
-                return d[0];
-            })
-            .attr('value', function (d) {
-                return d[0];
-            });
     }
 
     /**
      * Prepare the data and scales before we render it.
      */
-    updateVis() {
-        let vis = this;
-        let selectedYear = vis.selectedYear ? vis.selectedYear : vis.groupedYears[0][0];
-        const selectYearIndex = this.helper.getYearDataIndex(vis.groupedYears, selectedYear);
+    updateVis() {  
+      let vis = this;
+        vis.groupedYears = d3.groups(this.data, (d) => d.commitDate.getFullYear());
+        vis.selectedYear  = vis.selectedYear ? vis.selectedYear : vis.groupedYears[vis.groupedYears.length - 1][0];
+        const selectYearIndex = this.helper.getYearDataIndex(vis.groupedYears, vis.selectedYear);
         vis.selectedYearData = vis.groupedYears[selectYearIndex][1];
         vis.xValue = (d) => d[0];
         vis.yValue = (d) => this.week[d.day.getDay()];
-        vis.groupedWeekData = this.helper.createXDomain(selectedYear, vis.selectedYearData);
+        vis.groupedWeekData = this.helper.createXDomain(vis.selectedYear, vis.selectedYearData);
         vis.xScale.domain(vis.groupedWeekData.map(vis.xValue));
         vis.yScale.domain(this.week);
         vis.contributionIncrement = Math.floor(this.helper.getMaxCount() / 5);
@@ -160,6 +147,21 @@ class TimeSelectorVis {
             vis.selectedYear = Number(this.value);
             vis.updateVis();
         });
+
+        let dropdown = d3
+          .select('#select-year')
+          .selectAll('option')
+          .data(vis.groupedYears)
+          .join('option')
+            .text(function (d) {
+                return d[0];
+            })
+            .attr('value', function (d) {
+                return d[0];
+            })
+            .property('selected', (d) => {
+              return d[0] === vis.selectedYear 
+            })
 
         vis.xAxisG.call(vis.xAxis);
         vis.yAxisG.call(vis.yAxis);

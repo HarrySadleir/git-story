@@ -76,16 +76,15 @@ class TimeSelectorHelper {
     }
 
     fillBlock(d, contributionIncrement, contributionColor) {
-        let vis = this;
-        if (d.count >= contributionIncrement * 4) {
+        if (d.count > contributionIncrement * 4) {
             return contributionColor[4];
-        } else if (d.count >= contributionIncrement * 3) {
+        } else if (d.count > contributionIncrement * 3) {
             return contributionColor[3];
-        } else if (d.count >= contributionIncrement * 2) {
+        } else if (d.count > contributionIncrement * 2) {
             return contributionColor[3];
-        } else if (d.count >= contributionIncrement * 1) {
+        } else if (d.count > contributionIncrement * 1) {
             return contributionColor[2];
-        } else if (d.count >= 1) {
+        } else if (d.count > 1) {
             return contributionColor[1];
         } else {
             return contributionColor[0];
@@ -93,7 +92,6 @@ class TimeSelectorHelper {
     }
 
     mouseOver(event, d, fullMonths, tooltipLeftPadding, tooltipTopPadding) {
-        let vis = this;
         let count;
         let contribution;
         if (d.count > 1) {
@@ -120,21 +118,21 @@ class TimeSelectorHelper {
 
     selectPeriod(vis, d, selectedPeriod) {
         let tempSelectPeriod = selectedPeriod;
-        if (tempSelectPeriod.length < 2) {
+        // check if same value (deselect)
+        let isSelected = this.checkDate(d, tempSelectPeriod);
+        if (isSelected !== -1) {
+            tempSelectPeriod = [];
+        } else if (tempSelectPeriod.length < 2) {
             tempSelectPeriod.push(d.day);
             vis.updateVis();
         } else {
-            // check if same value (deselect)
-            let isSelected = this.checkDate(d, tempSelectPeriod);
-            if (isSelected !== -1) {
-                tempSelectPeriod = [];
-            } else if (d.day < tempSelectPeriod[0] || d.day > tempSelectPeriod[1]) {
-                // expand selection
-                if (d.day < tempSelectPeriod[0]) {
-                    tempSelectPeriod[0] = d.day;
-                } else {
-                    tempSelectPeriod[1] = d.day;
-                }
+            if (d.day < tempSelectPeriod[0] || d.day > tempSelectPeriod[1]) {
+              // expand selection
+              if (d.day < tempSelectPeriod[0]) {
+                  tempSelectPeriod[0] = d.day;
+              } else {
+                  tempSelectPeriod[1] = d.day;
+              }
             } else {
                 // shrink selection based on closest endpoint
                 let startDiff = Math.abs(d.day - tempSelectPeriod[0]);
