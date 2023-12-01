@@ -46,6 +46,9 @@ class ContributorVis {
 
         vis.colorScale = d3.scaleOrdinal(d3.schemeCategory10);
 
+        vis.simulation = d3.forceSimulation()
+            .force("center", d3.forceCenter(vis.width / 2, vis.height / 2).strength(1.25))
+            .force("collide", d3.forceCollide((d) => 5 + (vis.scale(d.totalInsertions + d.totalDeletions))));
 
         vis.chart = vis.chartArea.append("g");
     }
@@ -86,36 +89,30 @@ class ContributorVis {
     renderVis() {
         let vis = this;
 
-        // Create a hierarchy from the data
-        const hierarchyData = d3.hierarchy({ children: vis.filteredAuthors })
-            .sum((d) => d.totalInsertions + d.totalDeletions);
+        let node = vis.chart.selectAll("circle");
 
-        // Use d3.pack() to pack circles
-        const pack = d3.pack()
-            .size([vis.width, vis.height])
-            .padding(5) // Increase padding to spread circles further apart
-            .radius((d) => {
-                // Set a minimum radius to prevent circles from becoming too small
-                return Math.max(5, vis.scale(d.value));
-            });
+        vis.simulation.stop();
 
-        // Pack the circles and get the updated hierarchy
-        const packedData = pack(hierarchyData);
+        // update sim
+        let old = new Map(node.data().map(d => [d.contributorName, d]));
+        let restartSim = this.filteredAuthors.some(d => !old.has(d.contributorName));
+        vis.filteredAuthors = this.filteredAuthors.map(d => Object.assign(old.get(d.contributorName) || {}, d));
+
+        vis.simulation.nodes(vis.filteredAuthors);
+
+        vis.simulation.alpha(0.05).restart();
 
         // Bind data to visual elements (use packedData.descendants() to get the circles)
-        let node = vis.chart
-            .selectAll("circle")
-            .data(packedData.descendants().slice(1)) // Include all descendants
+        node = node
+            .data(vis.filteredAuthors) // Include all descendants
             .join("circle")
-            .attr("cx", (d) => d.x)
-            .attr("cy", (d) => d.y)
-            .attr("r", (d) => vis.scale(d.value))
+            .attr("r", (d) => vis.scale(d.totalInsertions + d.totalDeletions))
             .attr("fill", (d) => {
-                if (d.data.contributorName) {
-                    const index = selectedContributors.findIndex(contributor => contributor.name === d.data.contributorName);
+                if (d.contributorName) {
+                    const index = selectedContributors.findIndex(contributor => contributor.name === d.contributorName);
                     if (index !== -1) {
                         // Contributor is already selected, remove it
-                        return vis.colorScale(d.data.contributorName)
+                        return vis.colorScale(d.contributorName)
                     } else {
                         // Contributor is not selected, add it
                         return "white"
@@ -126,17 +123,47 @@ class ContributorVis {
             .attr("stroke", "black")
             .style("stroke-width", 1.5);
 
+        vis.simulation.on("tick", () => {
+            node.attr("cx", d => {
+                const radius = vis.scale(d.totalInsertions + d.totalDeletions);
+
+                d.x = Math.max(
+                    radius,
+                    Math.min(
+                        vis.width - radius,
+                        d.x
+                    )
+                );
+
+                return d.x
+            });
+
+            node.attr("cy", d => {
+                const radius = vis.scale(d.totalInsertions + d.totalDeletions);
+
+                d.y = Math.max(
+                    radius,
+                    Math.min(
+                        vis.height - radius,
+                        d.y
+                    )
+                );
+
+                return d.y
+            })
+        });
+
         node
             .on("mouseover", (event, d) => {
-                if (d.data.contributorName) {
+                if (d.contributorName) {
                     d3
                         .select("#tooltip")
                         .style("display", "block")
                         .style("left", event.pageX + vis.config.tooltipPadding + "px")
                         .style("top", event.pageY + vis.config.tooltipPadding + "px").html(`
-                    <div class='tooltip-title'>${d.data.contributorName}</div>
-                    <div>Additions: <strong>${d.data.totalInsertions}</strong></div>
-                    <div>Deletions: <strong>${d.data.totalDeletions}</strong></div>
+                    <div class='tooltip-title'>${d.contributorName}</div>
+                    <div>Additions: <strong>${d.totalInsertions}</strong></div>
+                    <div>Deletions: <strong>${d.totalDeletions}</strong></div>
                   `);
                 }
             })
@@ -145,8 +172,8 @@ class ContributorVis {
             });
 
         node.on("click", (event, d) => {
-            if (d.data.contributorName) {
-                const contributorName = d.data.contributorName;
+            if (d.contributorName) {
+                const contributorName = d.contributorName;
                 const color = vis.colorScale(contributorName);
                 const contributorObj = { name: contributorName, color: color };
 

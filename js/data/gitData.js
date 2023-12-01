@@ -14,6 +14,8 @@ class GitData {
      *  }>}
      */
     rawCommits;
+    dataWithinDateRange;
+    filteredData;
 
     constructor(data) {
         this.rawCommits = data.map(commit => {
@@ -24,6 +26,8 @@ class GitData {
         });
         // go from oldest -> latest
         this.rawCommits.reverse();
+        this.dataWithinDateRange = this.rawCommits;
+        this.filteredData = this.dataWithinDateRange;
     }
 
     /**
@@ -89,12 +93,45 @@ class GitData {
         }
     }
 
+    filterData(contributors, dateRange) {
+        if (dateRange.length !== 0) {
+            const startDate = new Date(dateRange[0]);
+            const endDate = new Date(dateRange[1]);
+
+            this.dataWithinDateRange = this.rawCommits.filter(commit => {
+                const commitDate = new Date(commit.commitDate);
+                return commitDate >= startDate && commitDate <= endDate;
+            }).map(commit => {
+                // Set color to an empty string for all commits
+                commit.color = '';
+                return commit;
+            });
+        } else {
+            this.dataWithinDateRange = this.rawCommits;
+        }
+
+        if (contributors.length !== 0) {
+            this.filteredData = this.dataWithinDateRange.filter(commit => {
+                return contributors.some(contributor => contributor.name === commit.authorName);
+            }).map(commit => {
+                const matchingContributor = contributors.find(contributor => contributor.name === commit.authorName);
+                if (matchingContributor) {
+                    commit.color = matchingContributor.color;
+                }
+                return commit;
+            });
+        } else {
+            this.filteredData = this.dataWithinDateRange;
+        }
+    }
+
+
     /**
      * Produces an array containing all contributors and their number of contributions over the given data.
      * @returns {Array<{contributorName: string, contributorEmails: Array<String>, numContributions: number, totalInsertions: number, totalDeletions: number}>}
      */
     getContributors() {
-        const contributors = d3.rollups(this.rawCommits, d => d, d => d.authorName);
+        const contributors = d3.rollups(this.dataWithinDateRange, d => d, d => d.authorName);
 
         return contributors.map(c => {
             return {
@@ -112,8 +149,8 @@ class GitData {
      * @param timeUnit {"day" | "week" | "month" | "year"}
      * @returns Array<Array<{}>>
      */
-    getGroupCommits(timeUnit) {
-        return d3.rollups(this.rawCommits, d => d, this.#getCommitKey.bind(this, timeUnit))
+    getGroupCommits(timeUnit) {        
+        return d3.rollups(this.filteredData, d => d, this.#getCommitKey.bind(this, timeUnit))
             .map(g => [new Date(g[0]), g[1]]);
     }
 
@@ -149,6 +186,8 @@ class GitData {
     fileTreeAtDate(date) {
         const rootNode = new FileNode(".", "");
         const latestCommitTime = date.getTime() / 1000;
+
+        const dataToUse = this.filteredData.length > 0 ? this.filteredData : this.dataWithinDateRange;
 
         for (const commit of this.rawCommits) {
             if (commit.commitTimeUnix >= latestCommitTime) {

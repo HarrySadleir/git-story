@@ -8,7 +8,7 @@ class TimeSelectorVis {
         };
         this.dispatcher = _dispatcher;
         this.helper = new TimeSelectorHelper();
-        this.data = this.helper.addCommitDate(_data.rawCommits);
+        this.data = this.helper.addCommitDate(_data.dataWithinDateRange);
         this.months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
         this.fullMonths = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
         this.week = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
