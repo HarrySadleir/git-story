@@ -9,10 +9,14 @@
 </head>
 
 <body>
-    <!-- Add HTML content, SVG drawing area, ... -->
     <h1>GitHub Repositories: One Commit at a Time</h1>
+    <!-- Add HTML content, SVG drawing area, ... -->
     <div id="app">
-        <svg id="contributor"/>
+        <div id="contributor-container">
+            <input id="contributor-input" type="text" placeholder="Enter a Contributor" list="contributors" class="contributor-selector-container" />
+            <datalist id="contributors"></datalist>
+            <svg id="contributor"/>
+        </div>
         <div id="timeline-container">
             <p id="granularity-selector-p">
                 Timeline Granularity:
