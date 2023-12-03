@@ -7,7 +7,7 @@ class ContributorVis {
             parentElement: _config.parentElement,
             containerWidth: _config.containerWidth || container.clientWidth,
             containerHeight: _config.containerHeight || container.clientHeight,
-            margin: _config.margin || { top: 20, right: 20, bottom: 20, left: 20 },
+            margin: _config.margin || { top: 5, right: 20, bottom: 20, left: 20 },
             tooltipPadding: 15,
         };
         this.dispatcher = _dispatcher;
@@ -51,6 +51,9 @@ class ContributorVis {
             .force("collide", d3.forceCollide((d) => 5 + (vis.scale(d.totalInsertions + d.totalDeletions))));
 
         vis.chart = vis.chartArea.append("g");
+
+        vis.suggestionInput = d3.select("#contributor-input");
+        vis.suggestionList = d3.select("#contributors");
     }
 
     /**
@@ -72,13 +75,28 @@ class ContributorVis {
             .scalePow()
             .exponent(0.5)
             .domain([0, maxTotal])
-            .range([5, 50]);
+            .range([5, 40]);
 
         const threshold = 0; // Adjust the threshold as needed (if we want fewer circles)
 
         vis.filteredAuthors = this.authors.filter(
             (d) => d.totalInsertions + d.totalDeletions >= threshold
         );
+
+        vis.suggestionList.selectAll("option")
+            .data(vis.filteredAuthors)
+            .join("option")
+            .attr("value", d => d.contributorName);
+
+        vis.suggestionInput.on("input", e => {
+            if (!vis.filteredAuthors.some(a => a.contributorName === e.target.value)) {
+                return;
+            }
+
+            this.toggleContributor(e.target.value);
+            e.target.value = "";
+            e.target.blur();
+        })
 
         vis.renderVis();
     }
@@ -89,7 +107,8 @@ class ContributorVis {
     renderVis() {
         let vis = this;
 
-        let node = vis.chart.selectAll("circle");
+        let node = vis.chart
+            .selectAll("circle");
 
         vis.simulation.stop();
 
@@ -100,11 +119,13 @@ class ContributorVis {
 
         vis.simulation.nodes(vis.filteredAuthors);
 
-        vis.simulation.alpha(0.05).restart();
+        if (restartSim) {
+            vis.simulation.alpha(0.05).restart();
+        }
 
         // Bind data to visual elements (use packedData.descendants() to get the circles)
         node = node
-            .data(vis.filteredAuthors) // Include all descendants
+            .data(vis.filteredAuthors)
             .join("circle")
             .attr("r", (d) => vis.scale(d.totalInsertions + d.totalDeletions))
             .attr("fill", (d) => {
@@ -164,6 +185,8 @@ class ContributorVis {
                     <div class='tooltip-title'>${d.contributorName}</div>
                     <div>Additions: <strong>${d.totalInsertions}</strong></div>
                     <div>Deletions: <strong>${d.totalDeletions}</strong></div>
+                    <br/>
+                    <i>Click to toggle the contributor</i>
                   `);
                 }
             })
@@ -174,25 +197,29 @@ class ContributorVis {
         node.on("click", (event, d) => {
             if (d.contributorName) {
                 const contributorName = d.contributorName;
-                const color = vis.colorScale(contributorName);
-                const contributorObj = { name: contributorName, color: color };
-
-                // Check if contributor is already selected
-                const index = selectedContributors.findIndex(contributor => contributor.name === contributorName);
-
-                if (index !== -1) {
-                    // Contributor is already selected, remove it
-                    selectedContributors.splice(index, 1);
-                } else {
-                    // Contributor is not selected, add it
-                    if (selectedContributors.length < 10) {
-                        selectedContributors.push(contributorObj);
-                    }
-                }
-
-                vis.dispatcher.call("filterContributors", event, selectedContributors);
+                this.toggleContributor(contributorName);
             }
         });
 
+    }
+
+    toggleContributor(contributorName) {
+        const color = this.colorScale(contributorName);
+        const contributorObj = { name: contributorName, color: color };
+
+        // Check if contributor is already selected
+        const index = selectedContributors.findIndex(contributor => contributor.name === contributorName);
+
+        if (index !== -1) {
+            // Contributor is already selected, remove it
+            selectedContributors.splice(index, 1);
+        } else {
+            // Contributor is not selected, add it
+            if (selectedContributors.length < 10) {
+                selectedContributors.push(contributorObj);
+            }
+        }
+
+        this.dispatcher.call("filterContributors", event, selectedContributors);
     }
 }
