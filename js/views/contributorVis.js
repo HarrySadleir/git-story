@@ -140,7 +140,7 @@ class ContributorVis {
                     }
                 }
             })
-            .style("fill-opacity", 0.3)
+            .style("fill-opacity", 0.8)
             .attr("stroke", "black")
             .style("stroke-width", 1.5);
 
