@@ -22,25 +22,37 @@ class TimeSelectorHelper {
         let yearWeeks = [];
         let fullYearCalendar = this.fillCalendar(year);
         fullYearCalendar = this.mergeDays(fullYearCalendar, yearData);
-
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        const monthObj = {0: 3, 1: 4, 2: 5, 3: 4, 4: 4, 5: 5, 6: 4, 7: 4, 8: 5, 9: 4, 10: 4, 11: 6};
         this.maxCount = d3.max(fullYearCalendar, (d) => d.count);
+
         // initilize size of first week of year:
         let firstWeekArrSize = new Date(`${year}-01-01`).getDay() === 6 ? 7 : 6 - new Date(`${year}-01-01`).getDay();
         let days = [];
         for (let i = 0; i < firstWeekArrSize; i++) {
             days.push(fullYearCalendar[i]);
         }
-        yearWeeks.push(['week0', days]);
-        for (let week = 0; week < 52; week++) {
-            days = [];
+        yearWeeks.push(['Jan', days]);
+        let weekCounter = 0;
+        let dayCounter = firstWeekArrSize;
+        for (const month in monthObj) {
+          for (let monthWeek = 0; monthWeek < monthObj[month]; monthWeek++) {
+            let days = [];
             for (let day = 0; day < 7; day++) {
-                const dayInfo = fullYearCalendar[day + week * 7 + firstWeekArrSize];
-                if (!dayInfo) {
-                    break;
-                }
-                days.push(dayInfo);
+              const dayInfo = fullYearCalendar[dayCounter];
+              if (!dayInfo) {
+                  break;
+              }
+              dayCounter++;
+              days.push(dayInfo);
             }
-            yearWeeks.push([`week${week + 1}`, days]);
+            weekCounter++;
+            let janMonthWeekCheck = monthWeek;
+            if (month === '0') {
+              janMonthWeekCheck = monthWeek + 1;
+            }
+            yearWeeks.push([`${months[month]}${janMonthWeekCheck === 0 ? '' : janMonthWeekCheck}`, days]);
+          }
         }
         return yearWeeks;
     }
