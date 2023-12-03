@@ -83,7 +83,11 @@ class TimeSelectorVis {
         vis.groupedYears = d3.groups(this.data, (d) => d.commitDate.getFullYear());
         vis.selectedYear  = vis.selectedYear ? vis.selectedYear : vis.groupedYears[vis.groupedYears.length - 1][0];
         const selectYearIndex = this.helper.getYearDataIndex(vis.groupedYears, vis.selectedYear);
-        vis.selectedYearData = vis.groupedYears[selectYearIndex][1];
+        if (vis.groupedYears[selectYearIndex]) {
+          vis.selectedYearData = vis.groupedYears[selectYearIndex][1];
+        } else {
+          vis.selectedYearData = [];
+        }
         vis.xValue = (d) => d[0];
         vis.yValue = (d) => this.week[d.day.getDay()];
         vis.groupedWeekData = this.helper.createXDomain(vis.selectedYear, vis.selectedYearData);
