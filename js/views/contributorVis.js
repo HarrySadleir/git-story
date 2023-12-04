@@ -44,7 +44,7 @@ class ContributorVis {
                 `translate(${vis.config.margin.left},${vis.config.margin.top})`
             );
 
-        vis.colorScale = d3.scaleOrdinal(d3.schemeCategory10);
+        vis.colorScale = d3.scaleOrdinal(d3.schemeSet1);
 
         vis.simulation = d3.forceSimulation()
             .force("center", d3.forceCenter(vis.width / 2, vis.height / 2).strength(1.25))

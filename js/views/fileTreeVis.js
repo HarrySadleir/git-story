@@ -49,7 +49,7 @@ class FileTreeVis {
             .attr("font-size", "24")
             .attr("fill", "black")
             .attr("text-anchor", "middle")
-            .text("File Tree");
+            .text("File Tree - Sized by Commit Count");
 
         vis.simulation = d3.forceSimulation()
             .force("link", d3.forceLink().id(d => d.data.getFullyQualifiedPath())
@@ -101,9 +101,7 @@ class FileTreeVis {
             .slice(0, 6) // take the top 6 file types
             .map((arr) => arr[0]);
 
-        console.log(fileTypes);
-
-        vis.colorScale = d3.scaleOrdinal(d3.schemeTableau10)
+        vis.colorScale = d3.scaleOrdinal(d3.schemeSet3)
             .domain(fileTypes)
             .unknown("#555555");
 
@@ -251,7 +249,7 @@ class FileTreeVis {
             .data([fileTypes])
             .join("g")
             .attr("class", "legend")
-            .attr("transform", `translate(-${vis.width / 2 - 18}, ${vis.height / 2 - 25})`);
+            .attr("transform", `translate(${vis.width / 2 - legendWidth - 18}, ${vis.height / 2 - 25})`);
 
         legendGroup.selectAll(".legend-border")
             .data(d => [d])
