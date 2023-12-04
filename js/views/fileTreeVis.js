@@ -249,7 +249,8 @@ class FileTreeVis {
             .data([fileTypes])
             .join("g")
             .attr("class", "legend")
-            .attr("transform", `translate(${vis.width / 2 - legendWidth - 18}, ${vis.height / 2 - 25})`);
+            .attr("transform", d =>
+                `translate(${vis.width / 2 - legendWidth - 18}, ${-vis.height / 2 + d.length * 24 + 18})`);
 
         legendGroup.selectAll(".legend-border")
             .data(d => [d])
