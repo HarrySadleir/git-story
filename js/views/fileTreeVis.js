@@ -181,10 +181,6 @@ class FileTreeVis {
                 this.updateVis();
             })
             .on("mouseover", (event, d) => {
-                if (d.depth > 1) {
-                    return;
-                }
-
                 let hoverColor;
 
                 if (d.data.data.isDirectory()) {
@@ -197,7 +193,10 @@ class FileTreeVis {
                     hoverColor = `rgb(${r},${g},${b})`;
                 }
 
-                d3.select(event.currentTarget).attr('fill', hoverColor);
+                if (d.depth <= 1) {
+                    d3.select(event.currentTarget).attr('fill', hoverColor);
+                }
+
                 d3
                     .select("#tooltip")
                     .style("display", "block")
@@ -208,9 +207,16 @@ class FileTreeVis {
                         <b>Parent:</b> ${d.data.data.parentPath ?? "None"} <br/>
                         <b># of Commits:</b> ${d.data.data.getChangesCount()}
                       </p>
-                      ${d.data.data.isDirectory() && d.data.name !== "." ?
+                      ${(d.data.data.isDirectory() && d.data.name !== "." && d.depth <= 1) ?
                         `<i>Click to ${d.depth === 0 ? "close" : "expand"} directory</i>` : ""}
               `);
+            })
+            .on("mousemove", (event, d) => {
+                d3
+                    .select("#tooltip")
+                    .style("display", "block")
+                    .style("left", event.pageX + vis.config.tooltipPadding + "px")
+                    .style("top", event.pageY + vis.config.tooltipPadding + "px")
             })
             .on('mouseleave', (event, d) => {
                 d3.select('#tooltip').style('display', 'none');
