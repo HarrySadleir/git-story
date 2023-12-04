@@ -78,6 +78,7 @@ body {
     flex-direction: column;
     align-items: center;
     height: 100%;
+    justify-content: center;
     grid-area: time-selector;
 }
 
@@ -114,7 +115,7 @@ body {
 }
 
 .contribution-label {
-    font-size: 8px;
+    font-size: 12px;
 }
 
 /* ------------------------------ tooltip ------------------------------- */

@@ -24,6 +24,8 @@
 
 - creating dropdown in d3 references: https://d3-graph-gallery.com/graph/density_filter.html
 
+- default dropdown value references: https://stackoverflow.com/questions/26898814/setting-default-selection-of-a-dropdown-menu-with-d3
+
 
 ## fileTreeVis
 
