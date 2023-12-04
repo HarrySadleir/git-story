@@ -79,7 +79,7 @@ class TimeSelectorVis {
      * Prepare the data and scales before we render it.
      */
     updateVis() {  
-      let vis = this;
+        let vis = this;
         vis.groupedYears = d3.groups(this.data, (d) => d.commitDate.getFullYear());
         vis.selectedYear  = vis.selectedYear ? vis.selectedYear : vis.groupedYears[vis.groupedYears.length - 1][0];
         const selectYearIndex = this.helper.getYearDataIndex(vis.groupedYears, vis.selectedYear);
@@ -129,6 +129,13 @@ class TimeSelectorVis {
             .attr('height', (vis.width / 100))
             .attr('rx', 1)
             .attr('fill', (d) => this.helper.fillBlock(d, vis.contributionIncrement, this.contributionColor))
+            .attr('display', (d) => {
+              if (selectedContributors > 0) {
+                return selectedContributors.some(contributor => contributor.name === d.authorName) ? null : 'none'
+              } else {
+                return null;
+              }
+            })
             .classed('time-selector-active', (d) => !vis.yearChange && this.helper.checkDate(d, this.selectedPeriod) !== -1)
             .on('mouseover', (event, d) => this.helper.mouseOver(event, d, this.fullMonths, vis.tooltipLeftPadding, vis.tooltipTopPadding))
             .on('mouseleave', () => {

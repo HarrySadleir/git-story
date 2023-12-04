@@ -79,10 +79,12 @@ class TimeSelectorHelper {
     mergeDays(fullYearCalendar, yearData) {
         let updatedCalendar = fullYearCalendar;
         yearData.forEach((day) => {
+          if (selectedContributors.length === 0  || (selectedContributors.length > 0 && selectedContributors.some(contributor => contributor.name === day.authorName))) {
             const index = fullYearCalendar.findIndex((calendarDay) => {
-                return calendarDay.day.getMonth() === day.commitDate.getMonth() && calendarDay.day.getDate() === day.commitDate.getDate();
-            });
-            updatedCalendar[index].count++;
+              return calendarDay.day.getMonth() === day.commitDate.getMonth() && calendarDay.day.getDate() === day.commitDate.getDate();
+          });
+          updatedCalendar[index].count++;
+          }
         });
         return updatedCalendar;
     }
