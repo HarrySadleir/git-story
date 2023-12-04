@@ -109,7 +109,6 @@ dispatcher.on('filterContributors', _selectedContributors => {
 
     // Update fileTreeVis
     fileTreeVis.data = data;
-    fileTreeVis.updateData();
     fileTreeVis.updateVis();
 });
 

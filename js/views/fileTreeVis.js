@@ -42,7 +42,14 @@ class FileTreeVis {
             .attr("stroke", "#000")
             .attr("stroke-width", 1.5);
 
-        vis.colorScale = d3.scaleOrdinal(d3.schemeTableau10);
+        vis.svg.append("text")
+            .attr("id", "viz-title")
+            .attr("x", 0)
+            .attr("y", 24 - vis.height / 2)
+            .attr("font-size", "24")
+            .attr("fill", "black")
+            .attr("text-anchor", "middle")
+            .text("File Tree");
 
         vis.simulation = d3.forceSimulation()
             .force("link", d3.forceLink().id(d => d.data.getFullyQualifiedPath())
@@ -53,8 +60,6 @@ class FileTreeVis {
             .force("x", d3.forceX().strength(0.5))
             .force("y", d3.forceY().strength(0.3))
             .force("levelY", d3.forceY(vis.height / 2).strength((d) => Math.min(1, d.depth / 5)));
-
-		// TODO: Implement
 	}
 
     updateData(_data) {
@@ -64,7 +69,7 @@ class FileTreeVis {
 
         this.rScale = d3.scaleSqrt()
             .domain([0, fileTree.getChangesCount()])
-            .range([40, this.width / 3]);
+            .range([40, this.width / 3.5]);
 
         fileTree.expandIfAtDepth(0, 0);
         this.fileTree = fileTree;
@@ -77,13 +82,30 @@ class FileTreeVis {
 		let vis = this;
 
         const root = d3.hierarchy(this.fileTree);
-        const nodes = root.descendants()
-            .filter(n => n.data.expanded);
+        const nodes = root.descendants().filter(n => n.data.expanded);
         const links = root.links().filter(l => nodes.indexOf(l.target) !== -1);
 
         vis.linkScale = d3.scaleLinear()
             .domain([0, d3.max(nodes.map(n => n.depth))])
             .range([5, 0]);
+
+        const fileTypes = d3.rollups(
+            nodes.flatMap(n => d3.hierarchy(n.data.createInnerHierarchyNode(0, 4))
+                .descendants()
+                .filter(n => !n.data.data.isDirectory())),
+            (v) => v,
+            d => d.data.name.substring(d.data.name.lastIndexOf("."))
+        )
+            .map((arr) => [arr[0], arr[1].length])
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 6) // take the top 6 file types
+            .map((arr) => arr[0]);
+
+        console.log(fileTypes);
+
+        vis.colorScale = d3.scaleOrdinal(d3.schemeTableau10)
+            .domain(fileTypes)
+            .unknown("#555555");
 
 		// TODO: Implement
 		vis.renderVis(links, nodes);
@@ -221,6 +243,60 @@ class FileTreeVis {
             .attr("x", d => vis.rScale(d.data.getChangesCount()))
             .attr("y", -5)
             .text(d => d.depth === 0 ? "Root Folder" : d.data.name);
+
+        // legend
+        const fileTypes = [...vis.colorScale.domain(), "Other"].reverse();
+        const legendWidth = d3.max(fileTypes.map(e => e.length * 16 + 12));
+        const legendGroup = vis.svg.selectAll(".legend")
+            .data([fileTypes])
+            .join("g")
+            .attr("class", "legend")
+            .attr("transform", `translate(-${vis.width / 2 - 18}, ${vis.height / 2 - 25})`);
+
+        legendGroup.selectAll(".legend-border")
+            .data(d => [d])
+            .join("rect")
+            .attr("class", ".legend-border")
+            .attr("fill", "transparent")
+            .attr("x", -10)
+            .attr("y", d => -((d.length) * 24 + 14))
+            .attr("width", legendWidth)
+            .attr("height", d => d.length * 24 + 36)
+            .attr("stroke", "rgb(222, 222, 222)");
+
+        legendGroup.selectAll(".legend-title")
+            .data(d => [d])
+            .join("text")
+            .attr("class", "legend-title")
+            .attr("fill", "#333333")
+            .attr("stroke-width", "0")
+            .attr("font-size", 16)
+            .attr("text-anchor", "middle")
+            .attr("y", d => -((d.length) * 24) + 6)
+            .attr("x", legendWidth / 2 - 10)
+            .text("File Types");
+
+        const legendItem = legendGroup.selectAll(".legend-item")
+            .data(d => d)
+            .join("g")
+            .attr("class", "legend-item")
+            .attr("transform", (_, i) => `translate(0, -${i * 24})`);
+
+        legendItem.selectAll("circle")
+            .data(d => [d])
+            .join("circle")
+            .attr("r", 8)
+            .attr("stroke", "black")
+            .attr("fill", vis.colorScale);
+
+        legendItem.selectAll("text")
+            .data(d => [d])
+            .join("text")
+            .attr("fill", "#333333")
+            .attr("stroke-width", "0")
+            .attr("x", 12)
+            .attr("y", 4)
+            .text(d => d);
 
         vis.simulation.on("tick", () => {
             link
