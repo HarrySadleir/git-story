@@ -114,14 +114,11 @@ class ContributorVis {
 
         // update sim
         let old = new Map(node.data().map(d => [d.contributorName, d]));
-        let restartSim = this.filteredAuthors.some(d => !old.has(d.contributorName));
         vis.filteredAuthors = this.filteredAuthors.map(d => Object.assign(old.get(d.contributorName) || {}, d));
 
         vis.simulation.nodes(vis.filteredAuthors);
 
-        if (restartSim) {
-            vis.simulation.alpha(0.05).restart();
-        }
+        vis.simulation.alpha(0.05).restart();
 
         // Bind data to visual elements (use packedData.descendants() to get the circles)
         node = node
