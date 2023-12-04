@@ -156,11 +156,6 @@ class TimelineVis {
 
         vis.rolledData = data.getGroupCommits(vis.granularity);
 
-        // no data within the selected time range
-        if (vis.rolledData.length === 0) {
-            return;
-        }
-
         // Thought this could be removed, but without it when a contributor is selected then a date range is selected
         // the date range is not honoured.
         if (dateRange.length === 2) {
@@ -171,8 +166,8 @@ class TimelineVis {
 
         // Adjust scales based off the maximum stack size and date range
         const populatedDateRange = this.generateDateRange(
-            vis.rolledData[0][0],
-            vis.rolledData[vis.rolledData.length - 1][0],
+            vis.rolledData[0] ? vis.rolledData[0][0] : dateRange[0],
+            vis.rolledData[vis.rolledData.length - 1] ? vis.rolledData[vis.rolledData.length - 1][0] : dateRange[1],
             vis.granularity
         );
         vis.xScale.domain(populatedDateRange);
