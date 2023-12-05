@@ -66,7 +66,12 @@ class FileTreeVis {
     updateData(_data) {
         this.data = _data;
 
-        const fileTree = data.fileTreeAtDate(new Date());
+        let fileTree;
+        if (dateRange.length > 0) {
+            fileTree = data.fileTreeAtDate(dateRange[0], dateRange[1])
+        } else {
+            fileTree = data.fileTreeAtDate(new Date(0), new Date())
+        }
 
         this.rScale = d3.scaleSqrt()
             .domain([0, fileTree.getChangesCount()])

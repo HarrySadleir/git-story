@@ -183,13 +183,14 @@ class GitData {
      * @param date {Date}
      * @returns {FileNode}
      */
-    fileTreeAtDate(date) {
+    fileTreeAtDate(startDate, endDate) {
         const rootNode = new FileNode(".", "");
-        const latestCommitTime = date.getTime() / 1000;
+        const earliestCommitTime = startDate.getTime() / 1000;
+        const latestCommitTime = endDate.getTime() / 1000;
 
         for (const commit of this.rawCommits) {
-            if (commit.commitTimeUnix >= latestCommitTime) {
-                break;
+            if (commit.commitTimeUnix >= latestCommitTime || commit.commitTimeUnix <= earliestCommitTime) {
+                continue;
             }
 
             for (const file of commit.files) {
