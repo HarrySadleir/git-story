@@ -213,12 +213,10 @@ body {
 
 .barPos {
     fill: mediumseagreen;
-    fill-opacity: 0.8;
 }
 
 .barNeg {
     fill: orangered;
-    fill-opacity: 0.8;
 }
 
 .timeline-axis-title {
