@@ -49,7 +49,12 @@ class FileNode {
 
     // filter for changes relevant the selected contributors (START HERE)
     getChangesCount() {
-        let totalChanges = this.changesCount;
+        let totalChanges;
+        if (selectedContributors.length > 0) {
+            totalChanges = 0;
+        } else {
+            totalChanges = this.changesCount;
+        }
 
         this.commits.forEach(commit => {
             if (selectedContributors.some(contributor => contributor.name === commit.authorName)) {
