@@ -62,6 +62,7 @@ class FileTreeVis {
             .force("levelY", d3.forceY(vis.height / 2).strength((d) => Math.min(1, d.depth / 5)));
 	}
 
+    // only call when timerange has changed
     updateData(_data) {
         this.data = _data;
 

@@ -6,6 +6,7 @@ class FileNode {
      * @type {Array<FileNode>}
      */
     children = [];
+    commits = [];
     expanded = false;
     changesCount = 0;
 
@@ -46,8 +47,15 @@ class FileNode {
         }
     }
 
+    // filter for changes relevant the selected contributors (START HERE)
     getChangesCount() {
         let totalChanges = this.changesCount;
+
+        this.commits.forEach(commit => {
+            if (selectedContributors.some(contributor => contributor.name === commit.authorName)) {
+                totalChanges++;
+            }
+        });
 
         for (const child of this.children) {
             if (!child.expanded) {
@@ -88,7 +96,8 @@ class FileNode {
      * @param change {{ fileName: string, modificationType: 'A' | 'M' | 'D' }}
      * @returns FileNode
      */
-    applyChange(change) {
+    // TODO: add parameter for commit object
+    applyChange(change, commit) {
         if (change.fileName === name) {
             this.changesCount++;
             return this;
@@ -106,7 +115,11 @@ class FileNode {
 
         change.fileName = newChangeName;
 
-        const result = child.applyChange(change);
+        if (!this.commits.includes(commit)) {
+            this.commits.push(commit);
+        }
+
+        const result = child.applyChange(change, commit);
         this.#removeIfZombie(child);
         return result;
     }
@@ -163,7 +176,7 @@ class FileNode {
      * @param oldName
      * @param newName
      */
-    applyRename(oldName, newName) {
+    applyRename(oldName, newName, commit) {
         // applied at the root level: first, find and prune node
         const node = this.#findAndPrune(oldName);
 
@@ -175,7 +188,7 @@ class FileNode {
         const newNode = this.applyChange({
             fileName: newName,
             modificationType: "A"
-        });
+        }, commit);
 
         // add the old changes to the new node
         newNode.changesCount = node?.changesCount ?? 0;
