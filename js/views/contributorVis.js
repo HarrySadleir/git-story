@@ -190,6 +190,8 @@ class ContributorVis {
                         .style("left", event.pageX + vis.config.tooltipPadding + "px")
                         .style("top", event.pageY + vis.config.tooltipPadding + "px").html(`
                     <div class='tooltip-title'>${d.contributorName}</div>
+                    <div>${d.contributorEmails[0]}</div>
+                    <br/>
                     <div>Additions: <strong>${d.totalInsertions}</strong></div>
                     <div>Deletions: <strong>${d.totalDeletions}</strong></div>
                     <br/>
