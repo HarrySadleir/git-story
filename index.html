@@ -9,7 +9,12 @@
 </head>
 
 <body>
-    <h1>GitHub Repositories: One Commit at a Time</h1>
+    <div class="header-section">
+        <h1>GitStory: One Commit at a Time</h1>
+        <div class="info-icon" onclick="openDialog()">
+            <img src="/images/info.png" alt="Info Icon" width="30" height="30">
+        </div>
+    </div>
     <!-- Add HTML content, SVG drawing area, ... -->
     <div id="app">
         <div id="contributor-container">
@@ -40,6 +45,27 @@
         <svg id="file-tree"/>
     </div>
     <div id="tooltip"></div>
+    <div class="dialog-box" id="infoDialog">
+        <span class="close-btn" onclick="closeDialog()">&times;</span>
+        <p style="padding-top: 1rem">
+          Play around with our interactive visualizations to explore the evolution
+          of a GitHub repository (in this case, PrairieLearn). Filter for commits
+          between specific dates and click on contributors you're interested in to
+          see when they worked on the codebase, how much they contributed and what
+          the specific components they worked on are!
+        </p>
+    </div>
+
+    <!-- info dialog -->
+    <script>
+        function openDialog() {
+            document.getElementById("infoDialog").style.display = "block";
+        }
+    
+        function closeDialog() {
+            document.getElementById("infoDialog").style.display = "none";
+        }
+    </script>
 
     <!-- D3 bundle -->
     <script src="js/d3.v6.min.js"></script>
