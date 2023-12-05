@@ -7,7 +7,7 @@ class ContributorVis {
             parentElement: _config.parentElement,
             containerWidth: _config.containerWidth || container.clientWidth,
             containerHeight: _config.containerHeight || container.clientHeight,
-            margin: _config.margin || { top: 5, right: 20, bottom: 20, left: 20 },
+            margin: _config.margin || { top: 30, right: 20, bottom: 20, left: 20 },
             tooltipPadding: 15,
         };
         this.dispatcher = _dispatcher;
@@ -44,11 +44,21 @@ class ContributorVis {
                 `translate(${vis.config.margin.left},${vis.config.margin.top})`
             );
 
+        vis.svg
+            .append("text")
+            .attr("class", "chart-title")
+            .attr("x", vis.width / 2)
+            .attr("y", vis.config.margin.top - 10)
+            .attr("text-anchor", "middle")
+            .style("font-size", "16px")
+            .text("Contributors - Sized by (Insertions + Deletions)");
+
         vis.colorScale = d3.scaleOrdinal(d3.schemeSet1);
 
         vis.simulation = d3.forceSimulation()
             .force("center", d3.forceCenter(vis.width / 2, vis.height / 2).strength(1.25))
-            .force("collide", d3.forceCollide((d) => 5 + (vis.scale(d.totalInsertions + d.totalDeletions))));
+            .force("collide", d3.forceCollide((d) => 5 + (vis.scale(d.totalInsertions + d.totalDeletions))))
+            .alphaTarget(0.05);
 
         vis.chart = vis.chartArea.append("g");
 

@@ -14,6 +14,42 @@ body {
     font-weight: 400;
 }
 
+.header-section {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.info-icon {
+    cursor: pointer;
+    padding-right: 1rem;
+}
+
+/* Style for the dialog box */
+.dialog-box {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 1rem 1rem 0rem 1rem;
+    font-size: 16px;
+    line-height: 150%;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    box-shadow: 3px 3px 3px 0px rgb(92 92 92 / 0.5);
+    z-index: 1000;
+}
+
+/* Style for the close button */
+.close-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    cursor: pointer;
+}
+
 #app {
     width: 100%;
     height: calc(100% - 48px);
