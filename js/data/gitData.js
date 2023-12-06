@@ -183,25 +183,24 @@ class GitData {
      * @param date {Date}
      * @returns {FileNode}
      */
-    fileTreeAtDate(date) {
+    fileTreeAtDate(startDate, endDate) {
         const rootNode = new FileNode(".", "");
-        const latestCommitTime = date.getTime() / 1000;
-
-        const dataToUse = this.filteredData.length > 0 ? this.filteredData : this.dataWithinDateRange;
+        const earliestCommitTime = startDate.getTime() / 1000;
+        const latestCommitTime = endDate.getTime() / 1000;
 
         for (const commit of this.rawCommits) {
-            if (commit.commitTimeUnix >= latestCommitTime) {
-                break;
+            if (commit.commitTimeUnix >= latestCommitTime || commit.commitTimeUnix <= earliestCommitTime) {
+                continue;
             }
 
             for (const file of commit.files) {
                 // handle renames separately
                 if (file.modificationType === "R") {
-                    rootNode.applyRename(file.oldName, file.fileName);
+                    rootNode.applyRename(file.oldName, file.fileName, commit);
                     continue;
                 }
 
-                rootNode.applyChange({ ...file });
+                rootNode.applyChange({ ...file }, commit);
             }
         }
 

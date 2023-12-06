@@ -6,12 +6,22 @@ class FileNode {
      * @type {Array<FileNode>}
      */
     children = [];
+    commits = [];
     expanded = false;
     changesCount = 0;
 
     constructor(name, parentPath) {
         this.name = name;
         this.parentPath = parentPath;
+    }
+
+    isVisible() {
+        if (selectedContributors.length === 0) {
+            return true;
+        }
+
+        return this.commits.some(commit => selectedContributors.some(contributor => contributor.name === commit.authorName)) ||
+            this.children.some(c => c.isVisible());
     }
 
     expandIfAtDepth(depth, currDepth) {
@@ -47,7 +57,18 @@ class FileNode {
     }
 
     getChangesCount() {
-        let totalChanges = this.changesCount;
+        let totalChanges;
+        if (selectedContributors.length > 0) {
+            totalChanges = 0;
+        } else {
+            totalChanges = this.changesCount;
+        }
+
+        this.commits.forEach(commit => {
+            if (selectedContributors.some(contributor => contributor.name === commit.authorName)) {
+                totalChanges++;
+            }
+        });
 
         for (const child of this.children) {
             if (!child.expanded) {
@@ -67,7 +88,9 @@ class FileNode {
             depth: depth,
             data: this,
             children: includingChildren ?
-                this.children.filter(c => !c.expanded).map(c => c.createInnerHierarchyNode(depth + 1, maxDepth)) : []
+                this.children
+                    .filter(c => !c.expanded && c.isVisible())
+                    .map(c => c.createInnerHierarchyNode(depth + 1, maxDepth)) : []
         };
     }
 
@@ -88,9 +111,14 @@ class FileNode {
      * @param change {{ fileName: string, modificationType: 'A' | 'M' | 'D' }}
      * @returns FileNode
      */
-    applyChange(change) {
+    applyChange(change, commit) {
         if (change.fileName === name) {
             this.changesCount++;
+
+            if (!this.commits.includes(commit)) {
+                this.commits.push(commit);
+            }
+
             return this;
         }
 
@@ -106,7 +134,7 @@ class FileNode {
 
         change.fileName = newChangeName;
 
-        const result = child.applyChange(change);
+        const result = child.applyChange(change, commit);
         this.#removeIfZombie(child);
         return result;
     }
@@ -163,7 +191,7 @@ class FileNode {
      * @param oldName
      * @param newName
      */
-    applyRename(oldName, newName) {
+    applyRename(oldName, newName, commit) {
         // applied at the root level: first, find and prune node
         const node = this.#findAndPrune(oldName);
 
@@ -175,7 +203,7 @@ class FileNode {
         const newNode = this.applyChange({
             fileName: newName,
             modificationType: "A"
-        });
+        }, commit);
 
         // add the old changes to the new node
         newNode.changesCount = node?.changesCount ?? 0;
