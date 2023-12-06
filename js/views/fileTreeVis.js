@@ -105,7 +105,6 @@ class FileTreeVis {
             .domain(fileTypes)
             .unknown("#555555");
 
-		// TODO: Implement
 		vis.renderVis(links, nodes);
 	}
 

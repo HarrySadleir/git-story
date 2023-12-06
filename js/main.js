@@ -3,7 +3,6 @@ let data, timelineVis, timeSelectorVis, contributorVis, fileTreeVis;
 let selectedContributors = []
 let dateRange = [];
 
-// TODO: Add dispatcher events as needed
 const dispatcher = d3.dispatch('filterDates', 'filterContributors');
 
 /**
@@ -12,8 +11,6 @@ const dispatcher = d3.dispatch('filterDates', 'filterContributors');
 d3.dsv('%', 'data/processed_dataset.dsv')
     .then((_data) => {
         data = new GitData(_data);
-
-        // TODO: common scales, other shared behaviour
 
         timelineVis = new TimelineVis(
             {
@@ -56,7 +53,6 @@ d3.dsv('%', 'data/processed_dataset.dsv')
  * We filter data based on the selected date range and update the timeline, contributor, and file tree vises
  */
 dispatcher.on('filterDates', _dateRange => {
-    // TODO: Properly filter the data both based on this event and the currently selected contributors
     dateRange = _dateRange;
     data.filterData(selectedContributors, dateRange);
 

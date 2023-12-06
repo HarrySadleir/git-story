@@ -1,8 +1,6 @@
 class ContributorVis {
     constructor(_config, _dispatcher, _data) {
         const container = document.getElementById(_config.parentElement.substring(1));
-
-        // TODO: Add config defaults
         this.config = {
             parentElement: _config.parentElement,
             containerWidth: _config.containerWidth || container.clientWidth,
