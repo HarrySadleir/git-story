@@ -56,7 +56,6 @@ class FileNode {
         }
     }
 
-    // filter for changes relevant the selected contributors (START HERE)
     getChangesCount() {
         let totalChanges;
         if (selectedContributors.length > 0) {
@@ -112,7 +111,6 @@ class FileNode {
      * @param change {{ fileName: string, modificationType: 'A' | 'M' | 'D' }}
      * @returns FileNode
      */
-    // TODO: add parameter for commit object
     applyChange(change, commit) {
         if (change.fileName === name) {
             this.changesCount++;
