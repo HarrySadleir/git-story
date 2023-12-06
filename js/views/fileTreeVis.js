@@ -16,7 +16,7 @@ class FileTreeVis {
       tooltipPadding: 15,
 		};
 		this.initVis();
-        this.updateData(_data);
+        this.updateData(_data, true);
 	}
 
 	/**
@@ -62,15 +62,19 @@ class FileTreeVis {
             .force("levelY", d3.forceY(vis.height / 2).strength((d) => Math.min(1, d.depth / 5)));
 	}
 
-    // only call when timerange has changed
-    updateData(_data) {
+    updateData(_data, newDates) {
         this.data = _data;
 
         let fileTree;
-        if (dateRange.length > 0) {
-            fileTree = data.fileTreeAtDate(dateRange[0], dateRange[1])
+
+        if (newDates) {
+            if (dateRange.length > 0) {
+                fileTree = data.fileTreeAtDate(dateRange[0], dateRange[1])
+            } else {
+                fileTree = data.fileTreeAtDate(new Date(0), new Date())
+            }
         } else {
-            fileTree = data.fileTreeAtDate(new Date(0), new Date())
+            fileTree = this.fileTree;
         }
 
         this.rScale = d3.scaleSqrt()
@@ -88,7 +92,7 @@ class FileTreeVis {
 		let vis = this;
 
         const root = d3.hierarchy(this.fileTree);
-        const nodes = root.descendants().filter(n => n.data.expanded);
+        const nodes = root.descendants().filter(n => n.data.expanded && n.data.isVisible());
         const links = root.links().filter(l => nodes.indexOf(l.target) !== -1);
 
         vis.linkScale = d3.scaleLinear()
@@ -164,7 +168,7 @@ class FileTreeVis {
                 const root = pack(innerHierarchy);
 
                 return root.descendants();
-            })
+            }, d => d.data.data.getFullyQualifiedPath())
             .join("g")
             .attr("class", "inner-circle")
             .attr("id", d => d.data.data.getFullyQualifiedPath());

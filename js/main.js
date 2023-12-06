@@ -77,7 +77,7 @@ dispatcher.on('filterDates', _dateRange => {
 
     // Update fileTreeVis
     fileTreeVis.data = data;
-    fileTreeVis.updateData();
+    fileTreeVis.updateData(data, true);
     fileTreeVis.updateVis();
 
     if (_dateRange.length === 0) {
@@ -106,7 +106,7 @@ dispatcher.on('filterContributors', _selectedContributors => {
 
     // Update fileTreeVis
     fileTreeVis.data = data;
-    fileTreeVis.updateData();
+    fileTreeVis.updateData(data);
     fileTreeVis.updateVis();
 });
 

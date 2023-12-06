@@ -15,6 +15,15 @@ class FileNode {
         this.parentPath = parentPath;
     }
 
+    isVisible() {
+        if (selectedContributors.length === 0) {
+            return true;
+        }
+
+        return this.commits.some(commit => selectedContributors.some(contributor => contributor.name === commit.authorName)) ||
+            this.children.some(c => c.isVisible());
+    }
+
     expandIfAtDepth(depth, currDepth) {
         this.setExpanded(currDepth <= depth);
 
@@ -80,7 +89,9 @@ class FileNode {
             depth: depth,
             data: this,
             children: includingChildren ?
-                this.children.filter(c => !c.expanded).map(c => c.createInnerHierarchyNode(depth + 1, maxDepth)) : []
+                this.children
+                    .filter(c => !c.expanded && c.isVisible())
+                    .map(c => c.createInnerHierarchyNode(depth + 1, maxDepth)) : []
         };
     }
 
@@ -105,6 +116,11 @@ class FileNode {
     applyChange(change, commit) {
         if (change.fileName === name) {
             this.changesCount++;
+
+            if (!this.commits.includes(commit)) {
+                this.commits.push(commit);
+            }
+
             return this;
         }
 
@@ -119,10 +135,6 @@ class FileNode {
         }
 
         change.fileName = newChangeName;
-
-        if (!this.commits.includes(commit)) {
-            this.commits.push(commit);
-        }
 
         const result = child.applyChange(change, commit);
         this.#removeIfZombie(child);
