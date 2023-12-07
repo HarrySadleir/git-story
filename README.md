@@ -1,1 +1,1 @@
-# GitHub Repositories: One commit at a time
+# GitStory Repositories: One commit at a time

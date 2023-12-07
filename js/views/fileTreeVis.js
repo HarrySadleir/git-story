@@ -5,32 +5,32 @@ class FileTreeVis {
      * @param _config
      * @param _data {GitData}
      */
-	constructor(_config, _data) {
+    constructor(_config, _data) {
         const container = document.getElementById(_config.parentElement.substring(1));
 
-		this.config = {
-			parentElement: _config.parentElement,
-			containerWidth: _config.containerWidth || container.clientWidth,
-			containerHeight: _config.containerHeight || container.clientHeight,
-			margin: _config.margin || {top: 20, right: 20, bottom: 20, left: 20},
-      tooltipPadding: 15,
-		};
-		this.initVis();
+        this.config = {
+            parentElement: _config.parentElement,
+            containerWidth: _config.containerWidth || container.clientWidth,
+            containerHeight: _config.containerHeight || container.clientHeight,
+            margin: _config.margin || {top: 20, right: 20, bottom: 20, left: 20},
+            tooltipPadding: 15,
+        };
+        this.initVis();
         this.updateData(_data, true);
-	}
+    }
 
-	/**
-	 * Initialize scales/axes and append static chart elements
-	 */
-	initVis() {
-		let vis = this;
-		vis.width = vis.config.containerWidth - vis.config.margin.left - vis.config.margin.right;
-		vis.height = vis.config.containerHeight - vis.config.margin.top - vis.config.margin.bottom;
+    /**
+     * Initialize scales/axes and append static chart elements
+     */
+    initVis() {
+        let vis = this;
+        vis.width = vis.config.containerWidth - vis.config.margin.left - vis.config.margin.right;
+        vis.height = vis.config.containerHeight - vis.config.margin.top - vis.config.margin.bottom;
 
-		// Define size of SVG drawing area
-		vis.svg = d3.select(vis.config.parentElement)
-			.attr('width', vis.config.containerWidth)
-			.attr('height', vis.config.containerHeight)
+        // Define size of SVG drawing area
+        vis.svg = d3.select(vis.config.parentElement)
+            .attr('width', vis.config.containerWidth)
+            .attr('height', vis.config.containerHeight)
             .attr("viewBox", [-vis.width / 2, -vis.height / 2, vis.width, vis.height]);
 
         vis.linksGroup = vis.svg.append("g")
@@ -60,7 +60,7 @@ class FileTreeVis {
             .force("x", d3.forceX().strength(0.5))
             .force("y", d3.forceY().strength(0.3))
             .force("levelY", d3.forceY(vis.height / 2).strength((d) => Math.min(1, d.depth / 5)));
-	}
+    }
 
     updateData(_data, newDates) {
         this.data = _data;
@@ -85,11 +85,11 @@ class FileTreeVis {
         this.fileTree = fileTree;
     }
 
-	/**
-	 * Prepare the data and scales before we render it.
-	 */
-	updateVis() {
-		let vis = this;
+    /**
+     * Prepare the data and scales before we render it.
+     */
+    updateVis() {
+        let vis = this;
 
         const root = d3.hierarchy(this.fileTree);
         const nodes = root.descendants().filter(n => n.data.expanded && n.data.isVisible());
@@ -115,14 +115,14 @@ class FileTreeVis {
             .domain(fileTypes)
             .unknown("#555555");
 
-		vis.renderVis(links, nodes);
-	}
+        vis.renderVis(links, nodes);
+    }
 
-	/**
-	 * Bind data to visual elements
-	 */
-	renderVis(links, nodes) {
-		let vis = this;
+    /**
+     * Bind data to visual elements
+     */
+    renderVis(links, nodes) {
+        let vis = this;
 
         vis.simulation?.stop();
 
@@ -162,7 +162,7 @@ class FileTreeVis {
                     .sum(d => d.changesCount)
                     .sort((a, b) => b.value - a.value);
                 const pack = d3.pack()
-                    .size([2*radius, 2*radius])
+                    .size([2 * radius, 2 * radius])
                     .padding(5);
                 const root = pack(innerHierarchy);
 
@@ -217,7 +217,7 @@ class FileTreeVis {
                         <b># of Commits:</b> ${d.data.data.getChangesCount()}
                       </p>
                       ${(d.data.data.isDirectory() && d.data.name !== "." && d.depth <= 1) ?
-                        `<i>Click to ${d.depth === 0 ? "close" : "expand"} directory</i>` : ""}
+                    `<i>Click to ${d.depth === 0 ? "close" : "expand"} directory</i>` : ""}
               `);
             })
             .on("mousemove", (event, d) => {
@@ -236,7 +236,7 @@ class FileTreeVis {
             .selectAll(".inner-title")
             .data(d => (d.r >= (d.data.name.length * 3) && (!d.data.data.isDirectory() || d.depth === 3)) ? [d] : [])
             .join("text")
-            .attr("class",  "inner-title")
+            .attr("class", "inner-title")
             .attr("font-size", "12")
             .attr("fill", "black")
             .attr("stroke-width", "0")
@@ -344,5 +344,5 @@ class FileTreeVis {
                 return `translate(${bottomX}, ${bottomY})`
             });
         });
-	}
+    }
 }
