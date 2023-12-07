@@ -3,6 +3,9 @@ class TimeSelectorHelper {
         this.maxCount = null;
     }
 
+    /**
+     * adds the date object to each object based on unix time
+     */
     addCommitDate(data) {
         let commitYearData = data;
         commitYearData.forEach((commit, index) => {
@@ -11,6 +14,9 @@ class TimeSelectorHelper {
         return commitYearData;
     }
 
+    /**
+     * checks if the selected year is within the group data and returns it 
+     */
     getYearDataIndex(groupedYears, year) {
         for (let i = 0; i < groupedYears.length; i++) {
             if (groupedYears[i][0] === year) return i;
@@ -18,6 +24,9 @@ class TimeSelectorHelper {
         return -1;
     }
 
+    /**
+     * creates the xDomain via creating a dummy calendar year and merging with the existing data for that year
+     */
     createXDomain(year, yearData) {
         let yearWeeks = [];
         let fullYearCalendar = this.fillCalendar(year);
@@ -57,10 +66,16 @@ class TimeSelectorHelper {
         return yearWeeks;
     }
 
+    /**
+     * returns the largest commit amount for a single day
+     */
     getMaxCount() {
         return this.maxCount;
     }
 
+    /**
+     * creates default values for each day of the year
+     */
     fillCalendar(year) {
         let calendar = [];
         for (let month = 0; month < 12; month++) {
@@ -72,10 +87,16 @@ class TimeSelectorHelper {
         return calendar;
     }
 
+    /**
+     * returns how many days for a given month
+     */
     daysInMonth(year, month) {
         return new Date(year, month, 0).getDate();
     }
 
+    /**
+     * update days when there is commit data to the default calendar
+     */
     mergeDays(fullYearCalendar, yearData) {
         let updatedCalendar = fullYearCalendar;
         yearData.forEach((day) => {
@@ -89,6 +110,9 @@ class TimeSelectorHelper {
         return updatedCalendar;
     }
 
+    /**
+     * returns the scaled color scheme based on the amount of contributions for that day
+     */
     fillBlock(d, contributionIncrement, contributionColor) {
         if (d.count > contributionIncrement * 4) {
             return contributionColor[4];
@@ -105,6 +129,9 @@ class TimeSelectorHelper {
         }
     }
 
+    /**
+     * handles the tooltip display hovering a day
+     */
     mouseOver(event, d, fullMonths, tooltipLeftPadding, tooltipTopPadding) {
         let count;
         let contribution;
@@ -130,6 +157,9 @@ class TimeSelectorHelper {
       `);
     }
 
+    /**
+     * adds/unselect/resize the selected period, sorts it, and calls dispatch
+     */
     selectPeriod(vis, d, selectedPeriod) {
         let tempSelectPeriod = selectedPeriod;
         // check if same value (deselect)
@@ -167,6 +197,9 @@ class TimeSelectorHelper {
         return selectedPeriod;
     }
 
+    /**
+     * checks if a given date matches the same date in the dates array
+     */
     checkDate(d, dates) {
         if (dates.length === 0) {
             return -1;
